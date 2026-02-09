@@ -11,22 +11,24 @@ import { useGlobalStore } from "@/store/globalStore";
 
 export default function AuthPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-base-200">
-      <div className="w-full max-w-md rounded-xl bg-base-100 p-6 shadow">
-        <h1 className="mb-6 text-center text-2xl font-bold">Bejelentkezés</h1>
+    <div className="flex min-h-screen items-center justify-center bg-[#36483D] text-[#A89D62]">
+      <div className="w-full max-w-md rounded-xl p-6 shadow-lg bg-[#6B4A2D]">
+        <h1 className="mb-6 text-center text-2xl font-bold text-[#BF944A]">Bejelentkezés</h1>
 
-        <input className="input input-bordered w-full mb-3" type="email" placeholder="Email" />
-        <input className="input input-bordered w-full mb-4" type="password" placeholder="Jelszó" />
-        <button className="btn btn-primary w-full">Belépés</button>
+        <input className="input input-bordered w-full mb-3 bg-[#6B4A2D] border-[#BF944A] text-white placeholder-[#BF944A] focus:outline-none focus:ring-0" type="email" placeholder="Email" />
+        <input className="input input-bordered w-full mb-4 bg-[#6B4A2D] border-[#BF944A] text-white placeholder-[#BF944A] focus:outline-none focus:ring-0" type="password" placeholder="Jelszó" />
 
-        <div className="divider">vagy</div>
+        <button className="btn w-full mb-4 bg-[#BF944A] text-[#36483D] hover:bg-[#A89D62]">Belépés</button>
 
-        <h2 className="mb-4 text-center text-xl font-semibold">Regisztráció</h2>
+        <div className="divider border-[#BF944A] my-4">vagy</div>
 
-        <input className="input input-bordered w-full mb-3" type="email" placeholder="Email" />
-        <input className="input input-bordered w-full mb-3" type="password" placeholder="Jelszó" />
-        <input className="input input-bordered w-full mb-4" type="password" placeholder="Jelszó újra" />
-        <button className="btn btn-secondary w-full">Regisztráció</button>
+        <h2 className="mb-4 text-center text-xl font-semibold text-[#A89D62]">Regisztráció</h2>
+
+        <input className="input input-bordered w-full mb-3 bg-[#6B4A2D] border-[#BF944A] text-white placeholder-[#BF944A] focus:outline-none focus:ring-0" type="email" placeholder="Email" />
+        <input className="input input-bordered w-full mb-3 bg-[#6B4A2D] border-[#BF944A] text-white placeholder-[#BF944A] focus:outline-none focus:ring-0" type="password" placeholder="Jelszó" />
+        <input className="input input-bordered w-full mb-4 bg-[#6B4A2D] border-[#BF944A] text-white placeholder-[#BF944A] focus:outline-none focus:ring-0" type="password" placeholder="Jelszó újra" />
+
+        <button className="btn w-full bg-[#A2A369] text-[#36483D] hover:bg-[#BF944A]">Regisztráció</button>
       </div>
     </div>
   );
