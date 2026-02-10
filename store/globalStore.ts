@@ -3,7 +3,6 @@ import { persist } from "zustand/middleware";
 
 //ez kell mert oldal újratöltésekor is megmaradjon az állapot. a zustand store nullra állítja vissza az értékeket, ha nincs ez a middleware
 
-
 export type Role = "ADMIN" | "DOCTOR" | "PATIENT";
 
 export type User = {
@@ -11,6 +10,9 @@ export type User = {
   name: string;
   email: string;
   role: Role;
+  phone: string;
+  address: string;
+  tajNumber: string;
 };
 
 type GlobalStore = {
@@ -77,8 +79,6 @@ export const useGlobalStore = create<GlobalStore>()(
 //     },
 //   ),
 // );
-
-
 
 // export const useGlobalStore = create<GlobalStore>()((set) => ({
 //   loggedUser: null,

@@ -17,6 +17,9 @@ type LoginResponse = {
   email: string;
   role: "ADMIN" | "DOCTOR" | "PATIENT";
   token: string;
+  phone: string;
+  address: string;
+  tajNumber: string;
 };
 
 export default function AuthPage() {
@@ -51,13 +54,15 @@ export default function AuthPage() {
         throw new Error("Hibás email vagy jelszó");
       }
 
-   
       setAuth(
         {
           id: data._id,
           name: data.name,
           email: data.email,
           role: data.role,
+          phone: data.phone,
+          address: data.address,
+          tajNumber: data.tajNumber,
         },
         data.token,
       );
