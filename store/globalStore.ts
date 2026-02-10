@@ -3,33 +3,82 @@ import { persist } from "zustand/middleware";
 
 //ez kell mert oldal újratöltésekor is megmaradjon az állapot. a zustand store nullra állítja vissza az értékeket, ha nincs ez a middleware
 
+
+export type Role = "ADMIN" | "DOCTOR" | "PATIENT";
+
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+};
+
 type GlobalStore = {
-  loggedUser: string | null;
+  user: User | null;
+  token: string | null;
   lightTheme: boolean;
-  id: string | null;
-  setId: (newId: string | null) => void;
-  // setLoggedUser: (newLoggedUser: string | null) => void;
-  // setLightTheme: (newLightTheme: boolean) => void;
-  setLoggedUser: (newLoggedUser: string | null) => void;
-  setLightTheme: (newLightTheme: boolean) => void;
+
+  setAuth: (user: User, token: string) => void;
+  logout: () => void;
+  setLightTheme: (value: boolean) => void;
 };
 
 export const useGlobalStore = create<GlobalStore>()(
   persist(
     (set) => ({
-      loggedUser: null,
+      user: null,
+      token: null,
       lightTheme: true,
-      id: null,
-      setId: (newId) => set({ id: newId }),
-      setLoggedUser: (newLoggedUser) => set({ loggedUser: newLoggedUser }),
-      setLightTheme: (newLightTheme) => set({ lightTheme: newLightTheme }),
-      logout: () => set({ loggedUser: null, id: null }),
+
+      setAuth: (user, token) =>
+        set({
+          user,
+          token,
+        }),
+
+      logout: () =>
+        set({
+          user: null,
+          token: null,
+        }),
+
+      setLightTheme: (lightTheme) => set({ lightTheme }),
     }),
     {
-      name: "global-storage", // Ez lesz a kulcs a localStorage-ban
+      name: "auth-storage",
     },
   ),
 );
+
+// type GlobalStore = {
+//   loggedUser: string | null;
+//   lightTheme: boolean;
+//   id: string | null;
+//   setId: (newId: string | null) => void;
+//   // setLoggedUser: (newLoggedUser: string | null) => void;
+//   // setLightTheme: (newLightTheme: boolean) => void;
+//   setLoggedUser: (newLoggedUser: string | null) => void;
+//   setLightTheme: (newLightTheme: boolean) => void;
+// };
+
+// export const useGlobalStore = create<GlobalStore>()(       2.verzió
+//   persist(
+//     (set) => ({
+//       loggedUser: null,
+//       lightTheme: true,
+//       id: null,
+//       setId: (newId) => set({ id: newId }),
+//       setLoggedUser: (newLoggedUser) => set({ loggedUser: newLoggedUser }),
+//       setLightTheme: (newLightTheme) => set({ lightTheme: newLightTheme }),
+//       logout: () => set({ loggedUser: null, id: null }),
+//     }),
+//     {
+//       name: "global-storage", // Ez lesz a kulcs a localStorage-ban
+//     },
+//   ),
+// );
+
+
 
 // export const useGlobalStore = create<GlobalStore>()((set) => ({
 //   loggedUser: null,
@@ -43,7 +92,7 @@ export const useGlobalStore = create<GlobalStore>()(
 //   //     id: newId,
 //   //   })),
 //   // setLoggedUser: (newLoggedUser) =>
-//   //   set((state) => ({
+//   //   set((state) => ({                                           1.verzió
 //   //     ...state,
 //   //     loggedUser: newLoggedUser,
 //   //   })),

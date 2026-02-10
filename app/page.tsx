@@ -11,9 +11,17 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { useGlobalStore } from "@/store/globalStore";
 
+type LoginResponse = {
+  _id: string;
+  name: string;
+  email: string;
+  role: "ADMIN" | "DOCTOR" | "PATIENT";
+  token: string;
+};
+
 export default function AuthPage() {
   const router = useRouter();
-  const { setLoggedUser, setId } = useGlobalStore();
+  const { setAuth } = useGlobalStore();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,6 +35,7 @@ export default function AuthPage() {
 
     try {
       setLoading(true);
+
       const res = await fetch(
         "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/users/login",
         {
@@ -36,43 +45,27 @@ export default function AuthPage() {
         },
       );
 
-      console.log("Státusz kód:", res.status);
-      const data = await res.json();
+      const data: LoginResponse = await res.json();
 
       if (!res.ok) {
-        console.error("Szerver oldali hiba:", data);
-        throw new Error(data.message || "Hiba történt a bejelentkezés során");
+        throw new Error("Hibás email vagy jelszó");
       }
 
-      // --- MENTÉS A STORE-BA ---
-      console.log("Sikeres bejelentkezés, adatok:", data);
+   
+      setAuth(
+        {
+          id: data._id,
+          name: data.name,
+          email: data.email,
+          role: data.role,
+        },
+        data.token,
+      );
 
-      // Feltételezve, hogy a backend a 'data' objektumban küldi a user nevét/emailjét és az id-t
-      // Példa: { user: { email: "teszt@gmail.com", id: "123" }, token: "..." }
-      // Ezt igazítsd a pontos backend válaszodhoz!
-      if (data) {
-        setLoggedUser(data.email || data.name);
-        setId(data.id || data._id);
-      } else {
-        // Ha a data maga a user objektum
-        setLoggedUser(data.email);
-        setId(data.id || data._id);
-      }
-
-      // Opcionális: Token mentése, ha használsz JWT-t
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-      }
-
-      toast.success("Sikeres bejelentkezés!");
+      toast.success(`Sikeres bejelentkezés, ${data.name}!`);
       router.push("/dashboard");
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        console.error("Elkapott hiba (catch):", err.message);
-        toast.error(err.message);
-      } else {
-        console.error("Ismeretlen hiba történt:", err);
-      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Ismeretlen hiba");
     } finally {
       setLoading(false);
     }
