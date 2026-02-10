@@ -1,0 +1,306 @@
+react orvosi alkalmazást készítek
+ez a backend
+https://romandi-vadaszhaz-klinik-backend.vercel.app/api-docs/
+
+most a bejelentkezést kéne ellenőrizni
+
+ilyen a mappa struktúra
+app/gyökér
+page.tsx
+"use client";
+
+import { clsx } from "clsx";
+import dayjs from "dayjs";
+import { SunMoon } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useState } from "react";
+import toast from "react-hot-toast";
+import { useGlobalStore } from "@/store/globalStore";
+
+export default function AuthPage() {
+  const router = useRouter();
+  const { setLoggedUser, setId } = useGlobalStore();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleLogin() {
+    if (!email || !password) {
+      toast.error("Email és jelszó kötelező");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const res = await fetch(
+        "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/users/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        },
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.message || "Hibás bejelentkezés");
+        return;
+      }
+
+      // 🔐 token tartósan
+      localStorage.setItem("token", data.token);
+
+      // 🧠 frontend állapot
+      setLoggedUser(data.user.email); // vagy name
+      setId(data.user._id); // ha string, akkor típust módosíts!
+
+      toast.success("Sikeres bejelentkezés 🎉");
+      router.push("/dashboard");
+    } catch (err) {
+      toast.error("Szerver hiba");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleRegister() {
+    // itt majd később backend ellenőrzés lesz
+    router.push("/registration");
+  }
+
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#36483D] text-[#A89D62]">
+      <h1 className="mb-14 text-center text-6xl font-bold text-[#BF944A]">
+        Romándi vadászház klinik
+      </h1>
+
+      <div className="w-full max-w-md rounded-xl bg-[#6B4A2D] p-6 shadow-lg">
+        <h1 className="mb-6 text-center text-2xl font-bold text-[#BF944A]">Bejelentkezés</h1>
+
+        <input
+          className="input-bordered input mb-3 w-full border-[#BF944A] bg-[#6B4A2D] text-white"
+          placeholder="Email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <input
+          className="input-bordered input mb-4 w-full border-[#BF944A] bg-[#6B4A2D] text-white"
+          placeholder="Jelszó"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <button
+          className="btn mb-4 w-full bg-[#BF944A] text-[#36483D] hover:bg-[#A89D62]"
+          disabled={loading}
+          onClick={handleLogin}
+        >
+          {loading ? "Belépés..." : "Belépés"}
+        </button>
+
+        <div className="divider my-4 mb-7 border-[#BF944A] text-2xl text-[#BF944A]">vagy</div>
+
+        <button
+          className="btn w-full bg-[#A2A369] text-[#36483D] hover:bg-[#BF944A]"
+          onClick={handleRegister}
+        >
+          Regisztráció
+        </button>
+      </div>
+    </div>
+  );
+}
+
+
+van több tábla
+
+ez a /api/users
+[
+  {
+    "_id": "string",
+    "name": "string",
+    "email": "string",
+    "phone": "string",
+    "role": "ADMIN",
+    "specialization": "string",
+    "tajNumber": "string",
+    "address": "string",
+    "token": "string"
+  }
+]
+
+/api/usesrs/register
+{
+  "name": "string",
+  "email": "string",
+  "password": "string",
+  "phone": "string",
+  "role": "PATIENT",
+  "specialization": "string",
+  "tajNumber": "string",
+  "address": "string"
+}
+
+/api/users/login
+{
+  "email": "string",
+  "password": "string"
+}
+
+
+ezt pedig a tests.https
+@baseUrl = http://localhost:3000/api
+###VERCEL
+@baseUrl = https://romandi-vadaszhaz-klinik-backend.vercel.app/api
+
+### 1.1 Összes felhasználó lekérése ADMIN ONLY
+GET {{baseUrl}}/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ODljZTIxZWQ4OTgzMzBjOTQ2ZjU3YiIsImlhdCI6MTc3MDY2OTEwMCwiZXhwIjoxNzczMjYxMTAwfQ.gSPBXgN0mvKMY1JNfiPMqXXEmdkTF-VP3yVqzC97cmA
+Content-Type: application/json
+### 1.2 Összes orvos lekérése
+GET {{baseUrl}}/users/doctors
+Content-Type: application/json
+
+### 1.3 Összes páciens lekérése ADMIN/DOCTOR ONLY
+GET {{baseUrl}}/users/patients
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OGEzZTcwNWNmNzRjNjQwYzFmNGIxYyIsImlhdCI6MTc3MDY2ODk4MCwiZXhwIjoxNzczMjYwOTgwfQ.6D_iQuX_dpyPz8QRi7XtfdkmTdf26eSWAwr4HzuWqp4
+Content-Type: application/json
+
+### 2. Regisztráció 
+POST {{baseUrl}}/users/register
+Content-Type: application/json
+
+{
+    "name": "Doktor János",
+    "email": "doktorjani@gmail.com",
+    "password": "pwd",
+    "phone": "+36301234567",
+    "tajNumber": "666 666 789",
+    "address": "9022 Győr, Admin tér 1.",
+    "specialization": "Katéterezés",
+    "role": "DOCTOR"
+}
+
+### 3. Bejelentkezés
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+
+{
+    "email": "admin@gmail.com",
+    "password": "pwd"
+}
+### 4. Profil lekérése
+GET {{baseUrl}}/users/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OGEzZTcwNWNmNzRjNjQwYzFmNGIxYyIsImlhdCI6MTc3MDY2NzY0NywiZXhwIjoxNzczMjU5NjQ3fQ.Yzm4-y1NAFzJkpO77YH0cNPHe3w-LsaFJPYju9DvB3w
+
+### 5. Profil frissítése (Név és telefonszám módosítása)
+PUT {{baseUrl}}/users/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ODljMjZmNDcyNzgyMTdlNjY3NjgyNCIsImlhdCI6MTc3MDY2Nzc3MSwiZXhwIjoxNzczMjU5NzcxfQ.14GEamK8aUT1Qcl-8971DKlMmEEKYuvh91eXatLiRpM
+Content-Type: application/json
+
+{
+    "name": "Páciens János",
+    "phone": "+36709998877",
+    "address": "9022 Győr, Páciens tér 1."
+}
+### 6. Felhasználó törlése ID alapján (Admin vagy Saját maga)
+DELETE {{baseUrl}}/users/6989ce21ed898330c946f57b
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ODljMjZmNDcyNzgyMTdlNjY3NjgyNCIsImlhdCI6MTc3MDYzOTA3OSwiZXhwIjoxNzczMjMxMDc5fQ.E_CsdK6wY2TZlDH8ezkJsbNvhPJQI8h4tL8xEo4aum4
+
+na most csak a bejejelntkezést kell ellenőrízni a regisztrációt (másik oldalon van) most haghyjuk
+"use client";
+
+import { clsx } from "clsx";
+import dayjs from "dayjs";
+import { SunMoon } from "lucide-react";
+import Image from "next/image";
+import { useEffect } from "react";
+import toast from "react-hot-toast";
+import { useGlobalStore } from "@/store/globalStore";
+import { useRouter } from "next/navigation"
+
+
+export default function AuthPage() {
+   const router = useRouter();
+
+   function handleLogin() {
+    // itt majd később backend ellenőrzés lesz
+    router.push("/dashboard");
+  }
+
+  function handleRegister() {
+    // itt majd később backend ellenőrzés lesz
+    router.push("/registration");
+  }
+
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#36483D] text-[#A89D62]">
+    <h1 className="text-6xl font-bold mb-14 text-[#BF944A] text-center">Romándi vadászház klinik</h1>
+
+      <div className="w-full max-w-md rounded-xl p-6 shadow-lg bg-[#6B4A2D]">
+
+        <h1 className="mb-6 text-center text-2xl font-bold text-[#BF944A]">Bejelentkezés</h1>
+
+        <input className="input input-bordered w-full mb-3 bg-[#6B4A2D] border-[#BF944A] text-white placeholder-[#BF944A] focus:outline-none focus:ring-0" type="email" placeholder="Email" />
+        <input className="input input-bordered w-full mb-4 bg-[#6B4A2D] border-[#BF944A] text-white placeholder-[#BF944A] focus:outline-none focus:ring-0" type="password" placeholder="Jelszó" />
+
+        <button onClick={handleLogin} className="btn w-full mb-4 bg-[#BF944A] text-[#36483D] hover:bg-[#A89D62]">Belépés</button>
+
+        <div className="divider mb-7 border-[#BF944A] my-4 text-[#BF944A] text-2xl">vagy</div>
+
+        {/* <h2 className="mb-4 text-center text-xl font-semibold text-[#A89D62]">Regisztráció</h2> */}
+
+        {/* <input className="input input-bordered w-full mb-3 bg-[#6B4A2D] border-[#BF944A] text-white placeholder-[#BF944A] focus:outline-none focus:ring-0" type="email" placeholder="Email" />
+        <input className="input input-bordered w-full mb-3 bg-[#6B4A2D] border-[#BF944A] text-white placeholder-[#BF944A] focus:outline-none focus:ring-0" type="password" placeholder="Jelszó" />
+        <input className="input input-bordered w-full mb-4 bg-[#6B4A2D] border-[#BF944A] text-white placeholder-[#BF944A] focus:outline-none focus:ring-0" type="password" placeholder="Jelszó újra" /> */}
+
+        <button onClick={handleRegister} className="btn w-full bg-[#A2A369] text-[#36483D] hover:bg-[#BF944A]">Regisztráció</button>
+      </div>
+    </div>
+  );
+}
+
+ez pedig a globalstore
+import { create } from "zustand";
+
+type GlobalStore = {
+  loggedUser: string | null;
+  lightTheme: boolean;
+  id: number | null;
+  setId: (newId: number | null) => void;
+  setLoggedUser: (newLoggedUser: string | null) => void;
+  setLightTheme: (newLightTheme: boolean) => void;
+};
+
+export const useGlobalStore = create<GlobalStore>()((set) => ({
+  loggedUser: null,
+  lightTheme: true,
+  id: null,
+  // A set függvény itt egy új állapotobjektumot ad vissza
+  setId: (newId) =>
+    set((state) => ({
+      // A visszatérési érték egy új objektum, ami az előző state-ből és a módosításokból áll
+      ...state,
+      id: newId,
+    })),
+  setLoggedUser: (newLoggedUser) =>
+    set((state) => ({
+      ...state,
+      loggedUser: newLoggedUser,
+    })),
+  setLightTheme: (newLightTheme) =>
+    set((state) => ({
+      ...state,
+      lightTheme: newLightTheme,
+    })),
+}));
+
+
+na a chatgpt az id és _id val küzd de áttértem ide
