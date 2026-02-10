@@ -93,7 +93,7 @@ export default function AuthPage() {
         <h1 className="mb-6 text-center text-2xl font-bold text-[#BF944A]">Bejelentkezés</h1>
 
         <input
-          className="input-bordered input mb-3 w-full border-[#BF944A] bg-[#6B4A2D] text-white"
+          className="input-bordered input mb-3 w-full border-[#BF944A] bg-[#6B4A2D] text-white focus:ring-0 focus:outline-none"
           placeholder="Email"
           type="email"
           value={email}
@@ -101,7 +101,7 @@ export default function AuthPage() {
         />
 
         <input
-          className="input-bordered input mb-4 w-full border-[#BF944A] bg-[#6B4A2D] text-white"
+          className="input-bordered input mb-4 w-full border-[#BF944A] bg-[#6B4A2D] text-white focus:ring-0 focus:outline-none"
           placeholder="Jelszó"
           type="password"
           value={password}

@@ -39,7 +39,7 @@ export default function DashboardPage() {
           <div>
             <label className="mb-1 block font-semibold">Név</label>
             <div className="flex gap-2">
-              <input className="input w-full bg-[#36483D] text-white" placeholder="Teljes név" />
+              <input className="input input-bordered border-[#BF944A] w-full mb-3 focus:outline-none focus:ring-0 bg-[#6B4A2D] text-white" placeholder="Teljes név" />
               <button className="btn bg-[#BF944A] text-[#36483D] hover:bg-[#A89D62]">
                 Módosítás
               </button>
@@ -50,7 +50,7 @@ export default function DashboardPage() {
           <div>
             <label className="mb-1 block font-semibold">Email</label>
             <div className="flex gap-2">
-              <input className="input w-full bg-[#36483D] text-white" placeholder="Email cím" />
+              <input className="input input-bordered border-[#BF944A] w-full mb-3 focus:outline-none focus:ring-0 bg-[#6B4A2D] text-white" placeholder="Email cím" />
               <button className="btn bg-[#BF944A] text-[#36483D] hover:bg-[#A89D62]">
                 Módosítás
               </button>
@@ -62,7 +62,7 @@ export default function DashboardPage() {
             <label className="mb-1 block font-semibold">Jelszó</label>
             <div className="flex gap-2">
               <input
-                className="input w-full bg-[#36483D] text-white"
+                className="input input-bordered border-[#BF944A] w-full mb-3 focus:outline-none focus:ring-0 bg-[#6B4A2D] text-white"
                 placeholder="Új jelszó"
                 type="password"
               />
