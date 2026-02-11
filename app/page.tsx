@@ -84,7 +84,7 @@ export default function AuthPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#36483D] text-[#A89D62]">
       <h1 className="mb-14 text-center text-6xl font-bold text-[#BF944A]">
-        Romándi vadászház klinik
+        Romándi Vadászház Klinik
       </h1>
 
       <div className="w-full max-w-md rounded-xl bg-[#6B4A2D] p-6 shadow-lg">
