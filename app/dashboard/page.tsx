@@ -44,29 +44,64 @@ export default function DashboardPage() {
   };
 
   const handleSave = async () => {
-    try {
-      const res = await fetch(`https://romandi-vadaszhaz-klinik-backend.vercel.app/api/users/profile`, {
+  console.log("=== SAVE START ===");
+
+  try {
+    console.log("USER:", user);
+    console.log("TOKEN:", token);
+    console.log("PHONE:", phone);
+    console.log("ADDRESS:", address);
+    console.log("PASSWORD:", password);
+
+    const bodyData: any = {
+      phone,
+      address,
+      password,
+    };
+
+    if (password.trim() !== "") {
+      bodyData.password = password;
+    }
+
+    console.log("BODY SENT:", bodyData);
+
+    const res = await fetch(
+      "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/users/profile",
+      {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}` // Kell a token a hitelesítéshez
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ phone, address, password: password || undefined }),
-      });
+        body: JSON.stringify(bodyData),
+      }
+    );
 
-      if (!res.ok) throw new Error("Hiba történt a mentés során");
+    console.log("STATUS:", res.status);
 
-      const updatedUser = await res.json();
-      
-      // Store frissítése az új adatokkal
-      setAuth(updatedUser, token!); 
-      setIsEditing(false);
-      setPassword("");
-      toast.success("Adatok sikeresen mentve!");
-    } catch (err) {
-      toast.error("Nem sikerült a mentés!");
+    const responseText = await res.text();
+    console.log("RAW RESPONSE:", responseText);
+
+    if (!res.ok) {
+      throw new Error(responseText);
     }
-  };
+
+    const updatedUser = JSON.parse(responseText);
+    console.log("PARSED USER:", updatedUser);
+
+    setAuth(updatedUser, token!);
+    setIsEditing(false);
+    setPassword("");
+
+    toast.success("Adatok sikeresen mentve!");
+  } catch (err: any) {
+    console.error("SAVE ERROR:", err);
+    toast.error("Nem sikerült a mentés!");
+  }
+
+  console.log("=== SAVE END ===");
+};
+
 
   const handleLogout = () => {
     logout();
