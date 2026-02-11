@@ -6,16 +6,24 @@ import toast from "react-hot-toast";
 import { useGlobalStore } from "@/store/globalStore";
 
 export default function DashboardPage() {
-  const { user, logout } = useGlobalStore();
+  const { user, token, logout, setAuth } = useGlobalStore();
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
 
-  // Hydration fix A Next.js és React között előfordul, hogy: szerver oldalon nincs localStorage, kliens oldalon meg van emiatt a user értéke nem ugyanaz SSR és CSR között -> Ez hydration hibát okozna.
+  // --- ÚJ ÁLLAPOTOK A SZERKESZTÉSHEZ ---
+  const [isEditing, setIsEditing] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [password, setPassword] = useState(""); // Jelszó opcionális
+
   useEffect(() => {
     setIsMounted(true);
-  }, []);
+    if (user) {
+      setPhone(user.phone || "");
+      setAddress(user.address || "");
+    }
+  }, [user]);
 
-  // Védelem: Ha nincs bejelentkezve, dobja vissza a loginra
   useEffect(() => {
     if (isMounted && !user) {
       router.push("/");
@@ -23,6 +31,42 @@ export default function DashboardPage() {
   }, [isMounted, user, router]);
 
   if (!isMounted || !user) return null;
+
+  // --- FUNKCIÓK ---
+
+  const handleCancel = () => {
+    // Visszaállítjuk az eredeti adatokat a store-ból
+    setPhone(user.phone || "");
+    setAddress(user.address || "");
+    setPassword("");
+    setIsEditing(false);
+    toast.error("Módosítások elvetve.");
+  };
+
+  const handleSave = async () => {
+    try {
+      const res = await fetch(`https://romandi-vadaszhaz-klinik-backend.vercel.app/api/users/profile`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}` // Kell a token a hitelesítéshez
+        },
+        body: JSON.stringify({ phone, address, password: password || undefined }),
+      });
+
+      if (!res.ok) throw new Error("Hiba történt a mentés során");
+
+      const updatedUser = await res.json();
+      
+      // Store frissítése az új adatokkal
+      setAuth(updatedUser, token!); 
+      setIsEditing(false);
+      setPassword("");
+      toast.success("Adatok sikeresen mentve!");
+    } catch (err) {
+      toast.error("Nem sikerült a mentés!");
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -32,116 +76,91 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#36483D] text-[#A89D62]">
-      {/* HEADER */}
+      {/* HEADER - maradt a régi */}
       <header className="flex h-16 items-center justify-between border-b border-[#BF944A]/20 bg-[#6B4A2D] px-6 shadow-lg">
         <div className="flex gap-2">
-          <button className="h-12 w-36 rounded bg-[#BF944A] font-bold text-[#36483D]">
-            Személyes
-          </button>
-          <button className="h-12 w-36 rounded bg-[#A2A369] text-[#36483D] transition-colors hover:bg-[#BF944A]">
-            Orvosok
-          </button>
-          <button className="h-12 w-36 rounded bg-[#A2A369] text-[#36483D] transition-colors hover:bg-[#BF944A]">
-            Időpontok
-          </button>
+          <button className="h-12 w-36 rounded bg-[#BF944A] font-bold text-[#36483D]">Személyes</button>
+          <button className="h-12 w-36 rounded bg-[#A2A369] text-[#36483D]">Orvosok</button>
         </div>
-
         <div className="flex items-center gap-4">
           <div className="flex flex-col text-right">
             <span className="leading-none font-bold text-[#BF944A]">{user.name}</span>
-            <span className="text-xs opacity-70">
-              {user.role === "PATIENT"
-                ? "Páciens"
-                : user.role === "ADMIN"
-                  ? "Adminisztrátor"
-                  : "Orvos"}
-            </span>
+            <span className="text-xs opacity-70">{user.role}</span>
           </div>
-          <button
-            onClick={handleLogout}
-            className="rounded bg-red-700/80 px-4 py-2 font-bold text-white transition-colors hover:bg-red-700"
-          >
+          <button onClick={handleLogout} className="rounded bg-red-700/80 px-4 py-2 font-bold text-white hover:bg-red-700">
             Kijelentkezés
           </button>
         </div>
       </header>
 
-      {/* TARTALOM */}
       <main className="mx-auto max-w-4xl p-8">
-        <h1 className="mb-6 text-3xl font-bold text-[#BF944A]">Személyes profil</h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold text-[#BF944A]">Személyes profil</h1>
+          
+          {/* GOMB LOGIKA */}
+          {!isEditing ? (
+            <button 
+              onClick={() => setIsEditing(true)}
+              className="btn bg-[#BF944A] text-[#36483D] border-none px-8"
+            >
+              Módosítás
+            </button>
+          ) : (
+            <div className="flex gap-2">
+              <button onClick={handleCancel} className="btn btn-error btn-outline">Mégse</button>
+              <button onClick={handleSave} className="btn bg-[#A2A369] text-[#36483D] border-none">Mentés</button>
+            </div>
+          )}
+        </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* SZERKESZTHETŐ ADATOK */}
           <div className="space-y-4 rounded-xl border border-[#BF944A]/10 bg-[#6B4A2D] p-6 shadow-lg">
-            <h2 className="mb-4 border-b border-[#BF944A]/20 pb-2 text-xl font-semibold">
-              Módosítható adatok
-            </h2>
+            <h2 className="mb-4 border-b border-[#BF944A]/20 pb-2 text-xl font-semibold">Módosítható adatok</h2>
 
             <div>
               <label className="mb-1 block text-sm">Telefonszám</label>
-              <div className="flex gap-2">
-                <input
-                  className="input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white focus:outline-none"
-                  defaultValue={user.phone} // Beletettük a valódi telefont (+3630...)
-                  placeholder="+36 30 123 4567"
-                />
-                <button className="btn border-none bg-[#BF944A] text-[#36483D] hover:bg-[#A89D62]">
-                  OK
-                </button>
-              </div>
+              <input
+                disabled={!isEditing}
+                className={`input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white focus:outline-none shadow-lg ${!isEditing && "opacity-50 cursor-not-allowed"}`}
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
             </div>
 
             <div>
               <label className="mb-1 block text-sm">Lakcím</label>
-              <div className="flex gap-2">
-                <input
-                  className="input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white focus:outline-none"
-                  defaultValue={user.address} // Beletettük a valódi címet (Admin tér...)
-                  placeholder="Város, utca, házszám"
-                />
-                <button className="btn border-none bg-[#BF944A] text-[#36483D] hover:bg-[#A89D62]">
-                  OK
-                </button>
-              </div>
+              <input
+                disabled={!isEditing}
+                className={`input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white focus:outline-none shadow-lg ${!isEditing && "opacity-50 cursor-not-allowed"}`}
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+              />
             </div>
 
             <div>
-              <label className="mb-1 block text-sm">Jelszó módosítása</label>
-              <div className="flex gap-2">
-                <input
-                  className="input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white focus:outline-none"
-                  type="password"
-                  placeholder="Új jelszó"
-                />
-                <button className="btn border-none bg-[#BF944A] text-[#36483D] hover:bg-[#A89D62]">
-                  OK
-                </button>
-              </div>
+              <label className="mb-1 block text-sm">Új jelszó (opcionális)</label>
+              <input
+                disabled={!isEditing}
+                type="password"
+                className={`input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white focus:outline-none shadow-lg ${!isEditing && "opacity-50 cursor-not-allowed"}`}
+                placeholder="Csak ha módosítani akarod"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
             </div>
           </div>
 
-          {/* FIX ADATOK (Csak olvasható) */}
+          {/* FIX ADATOK */}
           <div className="space-y-4 rounded-xl border border-[#BF944A]/10 bg-[#6B4A2D]/50 p-6 shadow-lg">
-            <h2 className="mb-4 border-b border-[#BF944A]/20 pb-2 text-xl font-semibold">
-              Hivatalos adatok
-            </h2>
-
+            <h2 className="mb-4 border-b border-[#BF944A]/20 pb-2 text-xl font-semibold">Hivatalos adatok</h2>
             <div className="rounded-lg bg-[#36483D]/50 p-3">
               <label className="block text-xs uppercase opacity-60">Teljes név</label>
               <span className="text-lg font-medium">{user.name}</span>
             </div>
-
-            <div className="rounded-lg bg-[#36483D]/50 p-3">
-              <label className="block text-xs uppercase opacity-60">Email cím</label>
-              <span className="text-lg font-medium">{user.email}</span>
-            </div>
-
             <div className="rounded-lg bg-[#36483D]/50 p-3">
               <label className="block text-xs uppercase opacity-60">TAJ szám</label>
               <span className="text-lg font-medium tracking-widest">{user.tajNumber}</span>
-              <p className="mt-1 text-[10px] text-yellow-600/70">
-                * Módosításhoz keresse fel az adminisztrációt.
-              </p>
             </div>
           </div>
         </div>

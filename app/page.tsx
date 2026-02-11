@@ -91,7 +91,7 @@ export default function AuthPage() {
         <h1 className="mb-6 text-center text-2xl font-bold text-[#BF944A]">Bejelentkezés</h1>
 
         <input
-          className="input-bordered input mb-3 w-full border-[#BF944A] bg-[#6B4A2D] text-white focus:ring-0 focus:outline-none"
+          className="input-bordered input mb-3 w-full border-[#BF944A] bg-[#36483D] text-white focus:ring-0 focus:outline-none shadow-lg"
           placeholder="Email"
           type="email"
           value={email}
@@ -99,7 +99,7 @@ export default function AuthPage() {
         />
 
         <input
-          className="input-bordered input mb-4 w-full border-[#BF944A] bg-[#6B4A2D] text-white focus:ring-0 focus:outline-none"
+          className="input-bordered input mb-4 w-full border-[#BF944A] bg-[#36483D] text-white focus:ring-0 focus:outline-none shadow-lg"
           placeholder="Jelszó"
           type="password"
           value={password}
@@ -107,7 +107,7 @@ export default function AuthPage() {
         />
 
         <button
-          className="btn mb-4 w-full bg-[#BF944A] text-[#36483D] hover:bg-[#A89D62]"
+          className="btn mb-4 w-full bg-[#BF944A] text-[#36483D] hover:bg-[#A89D62] shadow-lg"
           disabled={loading}
           onClick={handleLogin}
         >
@@ -117,7 +117,7 @@ export default function AuthPage() {
         <div className="divider my-4 mb-7 border-[#BF944A] text-2xl text-[#BF944A]">vagy</div>
 
         <button
-          className="btn w-full bg-[#A2A369] text-[#36483D] hover:bg-[#BF944A]"
+          className="btn w-full bg-[#A2A369] text-[#36483D] hover:bg-[#BF944A] shadow-lg"
           onClick={handleRegister}
         >
           Regisztráció
