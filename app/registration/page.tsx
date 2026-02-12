@@ -7,8 +7,8 @@ export default function RegistrationPage() {
   const router = useRouter();
   const [role, setRole] = useState<null | "doctor" | "patient">(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Állapotok az adatok tárolására
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -17,71 +17,60 @@ export default function RegistrationPage() {
     address: "",
     tajNumber: "",
     specialization: "",
-    birthDate: "", // Frontendben megvan, de a backendbe még nem küldjük
+    birthDate: "",
   });
 
-  const formMinHeight = "min-h-[480px]";
-
-  // Input változás kezelő
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (error) setError(null); // ha hiba volt, töröljük
   };
 
-  // Regisztráció beküldése
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  e.preventDefault();
+  if (!role) return;
 
-    const payload = {
-      name: formData.name,
-      email: formData.email,
-      password: formData.password,
-      phone: formData.phone,
-      address: formData.address,
-      role: role === "doctor" ? "DOCTOR" : "PATIENT",
-      specialization: role === "doctor" ? formData.specialization : "",
-      tajNumber: role === "patient" ? formData.tajNumber : "N/A",
-    };
+  setLoading(true);
+  setError(null);
 
-    // --- LOGOLÁS: Mit küldünk el? ---
-    console.log("REGISZTRÁCIÓ INDÍTÁSA...");
-    console.log("Küldött adatok (Payload):", payload);
-
-    try {
-      const res = await fetch(
-        "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/users/register",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        },
-      );
-
-      // --- LOGOLÁS: Szerver válasz státusza ---
-      console.log("Szerver válasz státuszkód:", res.status);
-
-      const data = await res.json();
-
-      // --- LOGOLÁS: Szerver válasz tartalma ---
-      console.log("Szerver válasz JSON:", data);
-
-      if (!res.ok) {
-        // Itt dobjuk a hibát, ha nem 200-as a válasz
-        throw new Error(data.message || `Szerver hiba: ${res.status}`);
-      }
-
-      toast.success("Sikeres regisztráció!");
-      router.push("/");
-    } catch (err) {
-      // --- LOGOLÁS: Elkapott hiba ---
-      console.error("Hiba történt a regisztráció során:", err);
-
-      const errorMessage = err instanceof Error ? err.message : "Ismeretlen hiba";
-      toast.error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
+  const payload = {
+    name: formData.name,
+    email: formData.email,
+    password: formData.password,
+    phone: formData.phone,
+    birthDate: formData.birthDate,
+    role: role === "doctor" ? "DOCTOR" : "PATIENT",
+    tajNumber: role === "patient" ? formData.tajNumber : undefined,
+    address: role === "patient" ? formData.address : undefined,
+    specialization: role === "doctor" ? formData.specialization : undefined,
   };
+
+  try {
+    const res = await fetch(
+      "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/users/register",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      },
+    );
+
+    const data = await res.json();
+    console.log("Szerver válasza:", data);
+
+    if (!res.ok) {
+      // Backend hibaüzenet kiírása a divbe
+      setError(data.error || data.message || "Szerver hiba");
+      return;
+    }
+
+    toast.success("Sikeres regisztráció!");
+    router.push("/");
+  } catch (err) {
+    setError(err instanceof Error ? err.message : "Ismeretlen hiba");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#36483D] p-6 text-[#A89D62]">
@@ -102,109 +91,74 @@ export default function RegistrationPage() {
         </button>
       </div>
 
-      {role === "doctor" && (
+      {role && (
         <form
-          className={`w-full max-w-md rounded-xl bg-[#6B4A2D] p-6 shadow-lg ${formMinHeight}`}
+          className="w-full max-w-md rounded-xl bg-[#6B4A2D] p-6 shadow-lg"
           onSubmit={handleSubmit}
         >
-          <h2 className="mb-4 text-xl font-semibold text-[#BF944A]">Orvos regisztráció</h2>
           <input
             className="input-bordered input mb-3 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:ring-0 focus:outline-none"
             name="name"
             placeholder="Név"
-            required
             onChange={handleChange}
           />
-          <input
-            className="input-bordered input mb-3 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:ring-0 focus:outline-none"
-            name="specialization"
-            placeholder="Szakterület"
-            required
-            onChange={handleChange}
-          />
-          <input
-            className="input-bordered input mb-3 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:ring-0 focus:outline-none"
-            name="phone"
-            placeholder="Telefonszám"
-            required
-            onChange={handleChange}
-          />
-          <input
-            className="input-bordered input mb-3 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:ring-0 focus:outline-none"
-            name="email"
-            placeholder="Email"
-            required
-            type="email"
-            onChange={handleChange}
-          />
-          <input
-            className="input-bordered input mb-4 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:ring-0 focus:outline-none"
-            name="password"
-            placeholder="Jelszó"
-            required
-            type="password"
-            onChange={handleChange}
-          />
-          <button
-            className="btn w-full bg-[#BF944A] text-[#36483D] shadow-lg hover:bg-[#A89D62]"
-            disabled={loading}
-            type="submit"
-          >
-            {loading ? "Regisztráció..." : "Regisztráció"}
-          </button>
-        </form>
-      )}
 
-      {role === "patient" && (
-        <form
-          className={`w-full max-w-md rounded-xl bg-[#6B4A2D] p-6 shadow-lg ${formMinHeight}`}
-          onSubmit={handleSubmit}
-        >
-          <h2 className="mb-4 text-xl font-semibold text-[#BF944A]">Páciens regisztráció</h2>
-          <input
-            className="input-bordered input mb-3 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:ring-0 focus:outline-none"
-            name="name"
-            placeholder="Név"
-            required
-            onChange={handleChange}
-          />
           <input
             className="input-bordered input mb-3 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:ring-0 focus:outline-none"
             name="birthDate"
-            placeholder="Születési dátum"
             type="date"
             onChange={handleChange}
           />
+
+          {role === "doctor" && (
+            <input
+              className="input-bordered input mb-3 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:ring-0 focus:outline-none"
+              name="specialization"
+              placeholder="Szakterület"
+              onChange={handleChange}
+            />
+          )}
+
+          {role === "patient" && (
+            <>
+              <input
+                className="input-bordered input mb-3 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:ring-0 focus:outline-none"
+                name="tajNumber"
+                placeholder="TAJ szám"
+                onChange={handleChange}
+              />
+              <input
+                className="input-bordered input mb-3 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:ring-0 focus:outline-none"
+                name="address"
+                placeholder="Lakcím"
+                onChange={handleChange}
+              />
+            </>
+          )}
+
           <input
             className="input-bordered input mb-3 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:ring-0 focus:outline-none"
             name="phone"
             placeholder="Telefonszám"
-            required
             onChange={handleChange}
           />
-          <input
-            className="input-bordered input mb-3 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:ring-0 focus:outline-none"
-            name="address"
-            placeholder="Lakcím"
-            required
-            onChange={handleChange}
-          />
+
           <input
             className="input-bordered input mb-3 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:ring-0 focus:outline-none"
             name="email"
             placeholder="Email"
-            required
             type="email"
             onChange={handleChange}
           />
+
           <input
-            className="input-bordered input mb-4 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:ring-0 focus:outline-none"
+            className="input-bordered input mb-3 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:ring-0 focus:outline-none"
             name="password"
             placeholder="Jelszó"
-            required
             type="password"
             onChange={handleChange}
           />
+
           <button
             className="btn w-full bg-[#A2A369] text-[#36483D] shadow-lg hover:bg-[#BF944A]"
             disabled={loading}
@@ -212,6 +166,12 @@ export default function RegistrationPage() {
           >
             {loading ? "Regisztráció..." : "Regisztráció"}
           </button>
+
+          {error && (
+  <div className="mt-6 rounded-md border border-red-400 bg-red-100 p-3 text-sm text-red-700">
+    {error}
+  </div>
+)}
         </form>
       )}
     </div>

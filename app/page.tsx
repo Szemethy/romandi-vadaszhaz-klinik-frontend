@@ -29,22 +29,41 @@ export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleLogin() {
-    if (!email || !password) {
-      toast.error("Kérlek töltsd ki mindkét mezőt!");
+    // whitespace levágás
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedEmail && !trimmedPassword) {
+      setError("Kérlek add meg az email címet és a jelszót!");
+      return;
+    }
+
+    if (!trimmedEmail) {
+      setError("Az email mező nem lehet üres!");
+      return;
+    }
+
+    if (!trimmedPassword) {
+      setError("A jelszó mező nem lehet üres!");
       return;
     }
 
     try {
       setLoading(true);
+      setError(null);
 
       const res = await fetch(
         "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/users/login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify({
+            email: trimmedEmail,
+            password: trimmedPassword,
+          }),
         },
       );
 
@@ -70,7 +89,7 @@ export default function AuthPage() {
       toast.success(`Sikeres bejelentkezés, ${data.name}!`);
       router.push("/dashboard");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Ismeretlen hiba");
+      setError(err instanceof Error ? err.message : "Ismeretlen hiba");
     } finally {
       setLoading(false);
     }
@@ -91,23 +110,29 @@ export default function AuthPage() {
         <h1 className="mb-6 text-center text-2xl font-bold text-[#BF944A]">Bejelentkezés</h1>
 
         <input
-          className="input-bordered input mb-3 w-full border-[#BF944A] bg-[#36483D] text-white focus:ring-0 focus:outline-none shadow-lg"
+          className="input-bordered input mb-3 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:ring-0 focus:outline-none"
           placeholder="Email"
           type="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            if (error) setError(null);
+          }}
         />
 
         <input
-          className="input-bordered input mb-4 w-full border-[#BF944A] bg-[#36483D] text-white focus:ring-0 focus:outline-none shadow-lg"
+          className="input-bordered input mb-4 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:ring-0 focus:outline-none"
           placeholder="Jelszó"
           type="password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            if (error) setError(null);
+          }}
         />
 
         <button
-          className="btn mb-4 w-full bg-[#BF944A] text-[#36483D] hover:bg-[#A89D62] shadow-lg"
+          className="btn mb-4 w-full bg-[#BF944A] text-[#36483D] shadow-lg hover:bg-[#A89D62]"
           disabled={loading}
           onClick={handleLogin}
         >
@@ -117,11 +142,17 @@ export default function AuthPage() {
         <div className="divider my-4 mb-7 border-[#BF944A] text-2xl text-[#BF944A]">vagy</div>
 
         <button
-          className="btn w-full bg-[#A2A369] text-[#36483D] hover:bg-[#BF944A] shadow-lg"
+          className="btn w-full bg-[#A2A369] text-[#36483D] shadow-lg hover:bg-[#BF944A]"
           onClick={handleRegister}
         >
           Regisztráció
         </button>
+
+        {error && (
+          <div className="mt-4 mb-4 rounded-md border border-red-400 bg-red-100 p-2 text-sm text-red-700">
+            {error}
+          </div>
+        )}
       </div>
     </div>
   );
