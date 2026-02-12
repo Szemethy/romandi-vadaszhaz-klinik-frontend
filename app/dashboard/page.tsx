@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useGlobalStore } from "@/store/globalStore";
+import dayjs from "dayjs";
+
 
 export default function DashboardPage() {
   const { user, token, logout, setAuth } = useGlobalStore();
@@ -16,14 +18,16 @@ export default function DashboardPage() {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [password, setPassword] = useState(""); // Jelszó opcionális
+  const [birthDate, setBirthDate] = useState("");
 
   useEffect(() => {
-    setIsMounted(true);
-    if (user) {
-      setPhone(user.phone || "");
-      setAddress(user.address || "");
-    }
-  }, [user]);
+  setIsMounted(true);
+  if (user) {
+    setPhone(user.phone || "");
+    setAddress(user.address || "");
+    setBirthDate(user.birthDate ? dayjs(user.birthDate).format("YYYY-MM-DD") : ""); // formázás
+  }
+}, [user]);
 
   useEffect(() => {
     if (isMounted && !user) {
@@ -58,6 +62,7 @@ export default function DashboardPage() {
         phone,
         address,
         password,
+        birthDate,
       };
 
       if (password.trim() !== "") {
@@ -231,6 +236,17 @@ export default function DashboardPage() {
                 onChange={(e) => setPhone(e.target.value)}
               />
             </div>
+
+            <div>
+  <label className="mb-1 block text-sm">Születési dátum</label>
+  <input
+    className={`input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:outline-none ${!isEditing && "cursor-not-allowed opacity-50"}`}
+    disabled={!isEditing}
+    type="date"
+    value={birthDate}
+    onChange={(e) => setBirthDate(e.target.value)}
+  />
+</div>
 
             <div>
               <label className="mb-1 block text-sm">Lakcím</label>

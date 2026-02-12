@@ -13,6 +13,7 @@ export type User = {
   phone: string;
   address: string;
   tajNumber: string;
+  birthDate?: string;
 };
 
 type GlobalStore = {
