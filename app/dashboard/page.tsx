@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useGlobalStore } from "@/store/globalStore";
 import dayjs from "dayjs";
+import Header from "@/app/header/page";
 
 
 export default function DashboardPage() {
@@ -118,83 +119,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-[#36483D] text-[#A89D62]">
       {/* HEADER - maradt a régi */}
-      <header className="border-b border-[#BF944A]/20 bg-[#6B4A2D] px-4 shadow-lg md:px-6">
-        <div className="flex h-16 items-center justify-between">
-          {/* LOGO / NAVIGATION */}
-          <div className="flex items-center gap-2">
-            {/* Asztali nézet gombjai */}
-            <div className="hidden gap-2 md:flex">
-              <button className="h-12 w-36 cursor-pointer rounded bg-[#BF944A] font-bold text-[#36483D] transition-colors hover:bg-[#A2A369]">
-                Személyes
-              </button>
-              <button className="h-12 w-36 cursor-pointer rounded bg-[#A2A369] font-bold text-[#36483D] transition-colors hover:bg-[#BF944A]">
-                Orvosok
-              </button>
-              <button className="h-12 w-36 cursor-pointer rounded bg-[#A2A369] font-bold text-[#36483D] transition-colors hover:bg-[#BF944A]">
-                Időpontok
-              </button>
-              <button className="h-12 w-36 cursor-pointer rounded bg-[#A2A369] font-bold text-[#36483D] transition-colors hover:bg-[#BF944A]">
-                Orvosi jelentések
-              </button>
-            </div>
-
-            {/* Hamburger gomb mobilon */}
-            <div className="md:hidden">
-              <button
-                className="rounded-md bg-[#BF944A] p-2 text-[#36483D]"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-              >
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          {/* Jobb oldali user info és kijelentkezés */}
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col text-right">
-              <span className="leading-none font-bold text-[#BF944A]">{user.name}</span>
-              <span className="text-xs opacity-70">{user.role}</span>
-            </div>
-            <button
-              className="rounded bg-red-700/80 px-4 py-2 font-bold text-white hover:bg-red-700"
-              onClick={handleLogout}
-            >
-              Kijelentkezés
-            </button>
-          </div>
-        </div>
-
-        {/* Mobil menü */}
-        {isMenuOpen && (
-          <div className="mt-2 flex flex-col gap-2 px-2 pb-2 md:hidden">
-            <button className="w-full cursor-pointer rounded bg-[#BF944A] py-2 font-bold text-[#36483D] transition-colors hover:bg-[#A2A369]">
-              Személyes
-            </button>
-            <button className="w-full cursor-pointer rounded bg-[#A2A369] py-2 font-bold text-[#36483D] transition-colors hover:bg-[#BF944A]">
-              Orvosok
-            </button>
-            <button className="w-full cursor-pointer rounded bg-[#A2A369] py-2 font-bold text-[#36483D] transition-colors hover:bg-[#BF944A]">
-              Időpontok
-            </button>
-            <button className="w-full cursor-pointer rounded bg-[#A2A369] py-2 font-bold text-[#36483D] transition-colors hover:bg-[#BF944A]">
-              Orvosi jelentések
-            </button>
-          </div>
-        )}
-      </header>
+      <main><Header /></main>
 
       <main className="mx-auto max-w-4xl p-8">
         <div className="mb-6 flex items-center justify-between">

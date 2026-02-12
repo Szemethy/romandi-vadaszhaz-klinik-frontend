@@ -20,6 +20,7 @@ type LoginResponse = {
   phone: string;
   address: string;
   tajNumber: string;
+  birthDate?: string;
 };
 
 export default function AuthPage() {
@@ -82,6 +83,7 @@ export default function AuthPage() {
           phone: data.phone,
           address: data.address,
           tajNumber: data.tajNumber,
+          birthDate: data.birthDate,
         },
         data.token,
       );
