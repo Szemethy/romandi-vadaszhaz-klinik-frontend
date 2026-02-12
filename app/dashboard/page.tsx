@@ -206,8 +206,12 @@ export default function DashboardPage() {
               <span className="text-lg font-medium">{user.name}</span>
             </div>
             <div className="rounded-lg bg-[#36483D]/50 p-3">
-              <label className="block text-xs uppercase opacity-60">TAJ szám</label>
-              <span className="text-lg font-medium tracking-widest">{user.tajNumber}</span>
+              {/* <label className="block text-xs uppercase opacity-60">TAJ szám</label>
+              <span className="text-lg font-medium tracking-widest">{user.tajNumber}</span> */}
+               <label className="block text-xs uppercase opacity-60">TAJ szám</label>
+  <span className="text-lg font-medium tracking-widest">
+    {user.tajNumber ? user.tajNumber : "N/A"}
+  </span>
             </div>
           </div>
         </div>
