@@ -58,6 +58,7 @@ export default function DashboardPage() {
       console.log("PHONE:", phone);
       console.log("ADDRESS:", address);
       console.log("PASSWORD:", password);
+      console.log("PASSWORD:", birthDate);
 
       const bodyData = {
         phone,
