@@ -18,7 +18,7 @@ type MedicalRecord = {
     name: string;
     specialization: string;
   };
-  service_id: {
+  service: {
     topic: string;
     location: string;
   };
@@ -58,6 +58,7 @@ export default function InfosPage() {
         if (!res.ok) throw new Error("Leletek lekérése sikertelen");
 
         const data = await res.json();
+             console.log(data);
         setRecords(data);
       } catch (err: any) {
         console.error("Hiba a lekérésekor:", err);
@@ -69,6 +70,8 @@ export default function InfosPage() {
 
     fetchRecords();
   }, [isMounted, token, user]);
+
+  
 
   return (
     <div className="min-h-screen bg-[#36483D] text-[#A89D62]">
@@ -92,13 +95,13 @@ export default function InfosPage() {
                 key={record._id}
                 className="rounded-xl border border-[#BF944A]/20 bg-[#6B4A2D] p-6 shadow-lg"
               >
-                <h2 className="mb-2 text-xl font-bold text-[#BF944A]">
-                  {record.service_id.topic}
+                {/* <h2 className="mb-2 text-xl font-bold text-[#BF944A]">
+                  {record.service.topic}
                 </h2>
 
                 <p className="mb-1 text-sm opacity-80">
-                  📍 {record.service_id.location}
-                </p>
+                  📍 {record.service.location}
+                </p> */}
 
                 <p className="mb-1 text-sm opacity-80">
                   👨‍⚕️ Orvos: {record.doctor.name} ({record.doctor.specialization})
