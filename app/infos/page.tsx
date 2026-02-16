@@ -18,7 +18,7 @@ type MedicalRecord = {
     name: string;
     specialization: string;
   };
-  service: {
+  service_id: {
     topic: string;
     location: string;
   };
@@ -39,10 +39,10 @@ export default function InfosPage() {
     if (!isMounted) return;
 
     if (!token || !user) {
-  setError("Nincs token vagy felhasználó - jelentkezz be először!");
-  setLoading(false);
-  return;
-}
+      setError("Nincs token vagy felhasználó - jelentkezz be először!");
+      setLoading(false);
+      return;
+    }
 
     const fetchRecords = async () => {
       try {
@@ -52,17 +52,22 @@ export default function InfosPage() {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
         if (!res.ok) throw new Error("Leletek lekérése sikertelen");
 
         const data = await res.json();
-             console.log(data);
+        console.log(data);
         setRecords(data);
-      } catch (err: any) {
-        console.error("Hiba a lekérésekor:", err);
-        setError(err.message);
+      } catch (err: unknown) {
+        console.error("Hiba a lekéréskor:", err);
+
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Ismeretlen hiba történt");
+        }
       } finally {
         setLoading(false);
       }
@@ -71,16 +76,12 @@ export default function InfosPage() {
     fetchRecords();
   }, [isMounted, token, user]);
 
-  
-
   return (
     <div className="min-h-screen bg-[#36483D] text-[#A89D62]">
       <Header />
 
       <main className="mx-auto max-w-6xl p-8">
-        <h1 className="mb-8 text-3xl font-bold text-[#BF944A]">
-          Orvosi leletek
-        </h1>
+        <h1 className="mb-8 text-3xl font-bold text-[#BF944A]">Orvosi leletek</h1>
 
         {loading ? (
           <p>Betöltés...</p>
@@ -92,26 +93,22 @@ export default function InfosPage() {
           <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
             {records.map((record) => (
               <div
-                key={record._id}
                 className="rounded-xl border border-[#BF944A]/20 bg-[#6B4A2D] p-6 shadow-lg"
+                key={record._id}
               >
-                {/* <h2 className="mb-2 text-xl font-bold text-[#BF944A]">
-                  {record.service.topic}
-                </h2>
+                <h2 className="mb-2 text-xl font-bold text-[#BF944A]">{record.service_id.topic}</h2>
 
-                <p className="mb-1 text-sm opacity-80">
-                  📍 {record.service.location}
-                </p> */}
+                <p className="mb-1 text-sm opacity-80">📍 {record.service_id.location}</p>
 
                 <p className="mb-1 text-sm opacity-80">
                   👨‍⚕️ Orvos: {record.doctor.name} ({record.doctor.specialization})
                 </p>
 
                 {user && user.role === "DOCTOR" && (
-  <p className="mb-1 text-sm opacity-80">
-    🧑 Páciens: {record.patient.name} (TAJ: {record.patient.tajNumber})
-  </p>
-)}
+                  <p className="mb-1 text-sm opacity-80">
+                    🧑 Páciens: {record.patient.name} (TAJ: {record.patient.tajNumber})
+                  </p>
+                )}
 
                 <p className="mb-3 text-sm opacity-80">
                   📅 {new Date(record.createdAt).toLocaleDateString("hu-HU")}
