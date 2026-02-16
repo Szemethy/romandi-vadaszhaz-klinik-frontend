@@ -18,7 +18,7 @@ type MedicalRecord = {
     name: string;
     specialization: string;
   };
-  service_id: {
+  service: {
     topic: string;
     location: string;
   };
@@ -96,9 +96,9 @@ export default function InfosPage() {
                 className="rounded-xl border border-[#BF944A]/20 bg-[#6B4A2D] p-6 shadow-lg"
                 key={record._id}
               >
-                <h2 className="mb-2 text-xl font-bold text-[#BF944A]">{record.service_id.topic}</h2>
+                <h2 className="mb-2 text-xl font-bold text-[#BF944A]">{record.service.topic}</h2>
 
-                <p className="mb-1 text-sm opacity-80">📍 {record.service_id.location}</p>
+                <p className="mb-1 text-sm opacity-80">📍 {record.service.location}</p>
 
                 <p className="mb-1 text-sm opacity-80">
                   👨‍⚕️ Orvos: {record.doctor.name} ({record.doctor.specialization})
