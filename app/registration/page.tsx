@@ -18,6 +18,7 @@ export default function RegistrationPage() {
     tajNumber: "",
     specialization: "",
     birthDate: "",
+    gender: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,11 +27,18 @@ export default function RegistrationPage() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  e.preventDefault(); // 👈 EZ LEGYEN LEGELŐL
+
   if (!role) return;
+
+  if (role === "patient" && !formData.gender) {
+    setError("Kérlek válaszd ki a nemet!");
+    return;
+  }
 
   setLoading(true);
   setError(null);
+
 
   const payload = {
     name: formData.name,
@@ -39,6 +47,7 @@ export default function RegistrationPage() {
     phone: formData.phone,
     birthDate: formData.birthDate,
     role: role === "doctor" ? "DOCTOR" : "PATIENT",
+    gender: role === "patient" ? formData.gender : undefined,
     tajNumber: role === "patient" ? formData.tajNumber : undefined,
     address: role === "patient" ? formData.address : undefined,
     specialization: role === "doctor" ? formData.specialization : undefined,
@@ -121,12 +130,26 @@ export default function RegistrationPage() {
 
           {role === "patient" && (
             <>
+            <select
+  name="gender"
+  value={formData.gender}
+  onChange={(e) =>
+    setFormData({ ...formData, gender: e.target.value })
+  }
+  className="input-bordered input mb-3 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:outline-none"
+>
+  <option value="">Nem kiválasztása</option>
+  <option value="MALE">Férfi</option>
+  <option value="FEMALE">Nő</option>
+</select>
+
               <input
                 className="input-bordered input mb-3 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:ring-0 focus:outline-none"
                 name="tajNumber"
                 placeholder="TAJ szám"
                 onChange={handleChange}
               />
+              
               <input
                 className="input-bordered input mb-3 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:ring-0 focus:outline-none"
                 name="address"

@@ -21,6 +21,7 @@ type LoginResponse = {
   address: string;
   tajNumber: string;
   birthDate?: string;
+   gender?: "MALE" | "FEMALE";
 };
 
 export default function AuthPage() {
@@ -84,6 +85,7 @@ export default function AuthPage() {
           address: data.address,
           tajNumber: data.tajNumber,
           birthDate: data.birthDate,
+          gender: data.gender,
         },
         data.token,
       );

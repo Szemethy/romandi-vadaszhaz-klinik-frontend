@@ -13,6 +13,8 @@ export default function DashboardPage() {
   const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [birthDateError, setBirthDateError] = useState<string | null>(null);
+
 
   // --- ÚJ ÁLLAPOTOK A SZERKESZTÉSHEZ ---
   const [isEditing, setIsEditing] = useState(false);
@@ -45,71 +47,68 @@ export default function DashboardPage() {
     setPhone(user.phone || "");
     setAddress(user.address || "");
     setPassword("");
+    setBirthDate(user.birthDate ? dayjs(user.birthDate).format("YYYY-MM-DD") : "");
+    setBirthDateError(null);
     setIsEditing(false);
     toast.error("Módosítások elvetve.");
   };
 
   const handleSave = async () => {
-    console.log("=== SAVE START ===");
+  console.log("=== SAVE START ===");
 
-    try {
-      console.log("USER:", user);
-      console.log("TOKEN:", token);
-      console.log("PHONE:", phone);
-      console.log("ADDRESS:", address);
-      console.log("PASSWORD:", password);
-      console.log("PASSWORD:", birthDate);
+  try {
+    setBirthDateError(null); // előző hiba törlése
 
-      const bodyData = {
-        phone,
-        address,
-        password,
-        birthDate,
-      };
+    const bodyData: any = {
+      phone,
+      address,
+      birthDate,
+    };
 
-      if (password.trim() !== "") {
-        bodyData.password = password;
-      }
-
-      console.log("BODY SENT:", bodyData);
-
-      const res = await fetch(
-        "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/users/profile",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(bodyData),
-        },
-      );
-
-      console.log("STATUS:", res.status);
-
-      const responseText = await res.text();
-      console.log("RAW RESPONSE:", responseText);
-
-      if (!res.ok) {
-        throw new Error(responseText);
-      }
-
-      const updatedUser = JSON.parse(responseText);
-      console.log("PARSED USER:", updatedUser);
-
-      setAuth(updatedUser, token!);
-      setIsEditing(false);
-      setPassword("");
-
-      toast.success("Adatok sikeresen mentve!");
-    } catch (err: unknown) {
-      //any volt eredietileg, de így pontosabb
-      console.error("SAVE ERROR:", err);
-      toast.error("Nem sikerült a mentés!");
+    if (password.trim() !== "") {
+      bodyData.password = password;
     }
 
-    console.log("=== SAVE END ===");
-  };
+    const res = await fetch(
+      "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/users/profile",
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(bodyData),
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || data.message || "Mentési hiba");
+    }
+
+    // ✅ Itt már a data maga az updated user
+    setAuth(data, token!);
+    setIsEditing(false);
+    setPassword("");
+
+    toast.success("Adatok sikeresen mentve!");
+  } catch (err: unknown) {
+    console.error("SAVE ERROR:", err);
+
+    const message =
+      err instanceof Error ? err.message : "Ismeretlen hiba";
+
+    // 🎯 birthDate backend validáció
+    if (message.includes("születési dátum")) {
+      setBirthDateError(message);
+    } else {
+      toast.error(message);
+    }
+  }
+
+  console.log("=== SAVE END ===");
+};
 
   const handleLogout = () => {
     logout();
@@ -166,23 +165,40 @@ export default function DashboardPage() {
             <div>
   <label className="mb-1 block text-sm">Születési dátum</label>
   <input
-    className={`input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:outline-none ${!isEditing && "cursor-not-allowed opacity-50"}`}
-    disabled={!isEditing}
     type="date"
+    disabled={!isEditing}
     value={birthDate}
-    onChange={(e) => setBirthDate(e.target.value)}
+    onChange={(e) => {
+      setBirthDate(e.target.value);
+
+      // ha javítja → tűnjön el a hiba
+      if (birthDateError) setBirthDateError(null);
+    }}
+    className={`input-bordered input w-full bg-[#36483D] text-white shadow-lg focus:outline-none
+      ${!isEditing && "cursor-not-allowed opacity-50"}
+      ${birthDateError ? "border-red-500" : "border-[#BF944A]"}`}
   />
+
+  {birthDateError && (
+    <div className="mt-2 text-sm text-red-400">
+      {birthDateError}
+    </div>
+  )}
 </div>
 
-            <div>
-              <label className="mb-1 block text-sm">Lakcím</label>
-              <input
-                className={`input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:outline-none ${!isEditing && "cursor-not-allowed opacity-50"}`}
-                disabled={!isEditing}
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-              />
-            </div>
+            {user.role === "PATIENT" && (
+  <div>
+    <label className="mb-1 block text-sm">Lakcím</label>
+    <input
+      className={`input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:outline-none ${
+        !isEditing && "cursor-not-allowed opacity-50"
+      }`}
+      disabled={!isEditing}
+      value={address}
+      onChange={(e) => setAddress(e.target.value)}
+    />
+  </div>
+)}
 
             <div>
               <label className="mb-1 block text-sm">Új jelszó (opcionális)</label>

@@ -14,6 +14,7 @@ export type User = {
   address: string;
   tajNumber: string;
   birthDate?: string;
+   gender?: "MALE" | "FEMALE";
 };
 
 type GlobalStore = {
