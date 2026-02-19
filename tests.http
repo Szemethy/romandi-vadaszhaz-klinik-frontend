@@ -54,11 +54,11 @@ Content-Type: application/json
 }
 
 ###
-POST {{{{baseUrl}}}}/users/login
+POST https://romandi-vadaszhaz-klinik-backend.vercel.app/api/users/login
 Content-Type: application/json
 
 {
-  "email": { "$ne": null },
+  "email": "roncz.oliver@students.jedlik.eu",
   "password": { "$ne": null }
 }
 
