@@ -31,10 +31,10 @@ export default function RegistrationPage() {
 
   if (!role) return;
 
-  if (role === "patient" && !formData.gender) {
-    setError("Kérlek válaszd ki a nemet!");
-    return;
-  }
+  // if (role === "patient" && !formData.gender) {
+  //   setError("Kérlek válaszd ki a nemet!");
+  //   return;
+  // }
 
   setLoading(true);
   setError(null);
@@ -200,6 +200,29 @@ export default function RegistrationPage() {
     </div>
   );
 }
+
+
+
+// if (!res.ok) {
+//   if (data.error) {
+//     const fieldErrors: Record<string, string> = {};
+
+//     const parts = data.error.split(",");
+
+//     parts.forEach((part: string) => {
+//       const match = part.match(/(\w+): (.+)/);
+//       if (match) {
+//         const [, field, message] = match;
+//         fieldErrors[field.trim()] = message.trim();
+//       }
+//     });
+
+//     setErrors(fieldErrors);
+//   }
+
+//   return;
+// } Olivér backendje nem küld normális json-t ez ezt oldaná meg....
+
 
 // "use client";
 // import { useState } from "react";
