@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import Header from "@/app/header/page";
+import { useRouter } from "next/navigation";
+import { useGlobalStore } from "@/store/globalStore";
 
 type Doctor = {
   _id: string;
@@ -12,8 +14,18 @@ type Doctor = {
 };
 
 export default function DoctorsPage() {
+  const router = useRouter();
+  const { user } = useGlobalStore();
+
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // 🔐 ROLE VÉDELEM
+  useEffect(() => {
+    if (user && user.role !== "PATIENT") {
+      router.push("/dashboard");
+    }
+  }, [user, router]);
 
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -33,6 +45,8 @@ export default function DoctorsPage() {
 
     fetchDoctors();
   }, []);
+
+  if (!user || user.role !== "PATIENT") return null;
 
   return (
     <div className="min-h-screen bg-[#36483D] text-[#A89D62]">
@@ -71,6 +85,16 @@ export default function DoctorsPage() {
                     ✉️ <span className="text-white">{doctor.email}</span>
                   </p>
                 </div>
+
+                {/* ✅ ÚJ GOMB */}
+                <button
+                  onClick={() =>
+                    router.push(`/doctorservices/${doctor._id}`)
+                  }
+                  className="mt-4 w-full rounded bg-[#A2A369] py-2 font-bold text-[#36483D] hover:bg-[#BF944A]"
+                >
+                  Szolgáltatások
+                </button>
               </div>
             ))}
           </div>
