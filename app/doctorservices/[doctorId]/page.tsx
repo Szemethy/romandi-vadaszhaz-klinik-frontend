@@ -19,7 +19,7 @@ type Service = {
 export default function DoctorServicesPage() {
   const { doctorId } = useParams();
   const router = useRouter();
-  const { user } = useGlobalStore();
+  const { user, token } = useGlobalStore(); 
 
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
@@ -73,25 +73,89 @@ export default function DoctorServicesPage() {
   // ⏱ percek 10-esével
   const minutes = [0, 10, 20, 30, 40, 50];
 
-  const handleBooking = () => {
-    setError("");
+  // ✅ BOOKING API HÍVÁS
+  const handleBooking = async (serviceId: string) => {
+  setError("");
 
-    if (!selectedDate || !selectedHour || !selectedMinute) {
-      setError("Minden mező kitöltése kötelező!");
-      return;
-    }
+  if (!selectedDate || !selectedHour || !selectedMinute) {
+    setError("Minden mező kitöltése kötelező!");
+    return;
+  }
 
-    const dayOfWeek = dayjs(selectedDate).day(); // 0=vasárnap
+  const dayOfWeek = dayjs(selectedDate).day();
 
-    if (!workingDays.includes(dayOfWeek)) {
-      setError("Az orvos nem rendel ezen a napon!");
-      return;
-    }
+  if (!workingDays.includes(dayOfWeek)) {
+    setError("Az orvos nem rendel ezen a napon!");
+    return;
+  }
 
-    alert(
-      `Sikeres foglalás: ${selectedDate} ${selectedHour}:${selectedMinute}`
+  if (!token) {
+    console.log("❌ TOKEN HIÁNYZIK:", token);
+    setError("Nincs jogosultság, kérlek jelentkezz be újra!");
+    return;
+  }
+
+  try {
+    const startDateTime = dayjs(
+      `${selectedDate} ${selectedHour}:${selectedMinute}`
+    ).toISOString();
+
+    const endDateTime = dayjs(startDateTime)
+      .add(30, "minute")
+      .toISOString();
+
+    const requestBody = {
+      doctor_id: doctorId,
+      service_id: serviceId,
+      startTime: startDateTime,
+      endTime: endDateTime,
+      referral_type: "SELF",
+    };
+
+    console.log("📤 KÜLDÖTT TOKEN:", token);
+    console.log("📤 KÜLDÖTT BODY:", requestBody);
+
+    const res = await fetch(
+      "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/appointments/",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(requestBody),
+      }
     );
-  };
+
+    console.log("📥 STATUS:", res.status);
+
+    const responseText = await res.text();
+    console.log("📥 RAW RESPONSE:", responseText);
+
+    let parsed;
+    try {
+      parsed = JSON.parse(responseText);
+    } catch {
+      parsed = responseText;
+    }
+
+    console.log("📥 PARSED RESPONSE:", parsed);
+
+    if (!res.ok) {
+      throw new Error(parsed?.message || "Foglalás sikertelen");
+    }
+
+    alert("Sikeres időpontfoglalás!");
+
+    setOpenBookingId(null);
+    setSelectedDate("");
+    setSelectedHour("");
+    setSelectedMinute("");
+  } catch (err: any) {
+    console.error("🔥 FRONTEND ERROR:", err);
+    setError(err.message || "Hiba történt a foglalás során");
+  }
+};
 
   return (
     <div className="min-h-screen bg-[#36483D] text-[#A89D62]">
@@ -130,7 +194,6 @@ export default function DoctorServicesPage() {
                   </p>
                 </div>
 
-                {/* 🔘 FOGLALÁS GOMB */}
                 <button
                   onClick={() =>
                     setOpenBookingId(
@@ -144,7 +207,6 @@ export default function DoctorServicesPage() {
                   Időpont foglalás
                 </button>
 
-                {/* 📅 FOGLALÁSI PANEL */}
                 {openBookingId === service._id && (
                   <div className="mt-4 space-y-3">
                     <input
@@ -154,7 +216,6 @@ export default function DoctorServicesPage() {
                       onChange={(e) => setSelectedDate(e.target.value)}
                     />
 
-                    {/* ÓRA */}
                     <select
                       className="w-full rounded p-2 text-black"
                       value={selectedHour}
@@ -168,7 +229,6 @@ export default function DoctorServicesPage() {
                       ))}
                     </select>
 
-                    {/* PERC */}
                     <select
                       className="w-full rounded p-2 text-black"
                       value={selectedMinute}
@@ -191,7 +251,7 @@ export default function DoctorServicesPage() {
                     )}
 
                     <button
-                      onClick={handleBooking}
+                      onClick={() => handleBooking(service._id)}
                       className="w-full rounded bg-green-600 py-2 font-bold text-white hover:bg-green-700"
                     >
                       Foglalás megerősítése
