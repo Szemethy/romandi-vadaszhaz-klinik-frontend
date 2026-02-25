@@ -56,9 +56,13 @@ export default function Header() {
         <div className="flex items-center gap-2">
           <div className="hidden gap-2 md:flex">
             {desktopBtn("/dashboard", "Személyes")}
-            {desktopBtn("/doctors", "Orvosok")}
-            {desktopBtn("/appointments", "Időpontok")}
-            {desktopBtn("/infos", "Orvosi jelentések")}
+
+{user.role !== "DOCTOR" && 
+  desktopBtn("/doctors", "Orvosok")
+}
+
+{desktopBtn("/appointments", "Időpontok")}
+{desktopBtn("/infos", "Orvosi jelentések")}
           </div>
 
           <div className="md:hidden">
@@ -107,9 +111,13 @@ export default function Header() {
       {isMenuOpen && (
         <div className="mt-2 flex flex-col gap-2 px-2 pb-2 md:hidden">
           {mobileBtn("/dashboard", "Személyes")}
-          {mobileBtn("/doctors", "Orvosok")}
-          {mobileBtn("/appointments", "Időpontok")}
-          {mobileBtn("/infos", "Orvosi jelentések")}
+
+{user.role !== "DOCTOR" && 
+  mobileBtn("/doctors", "Orvosok")
+}
+
+{mobileBtn("/appointments", "Időpontok")}
+{mobileBtn("/infos", "Orvosi jelentések")}
         </div>
       )}
     </header>
