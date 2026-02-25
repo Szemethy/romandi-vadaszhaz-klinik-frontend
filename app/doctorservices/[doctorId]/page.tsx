@@ -95,7 +95,7 @@ export default function DoctorServicesPage() {
           <p>📍 {service.location}</p>
           <p>📅 {dayjs(service.date).format("YYYY.MM.DD HH:mm")}</p>
           <p className="font-bold text-white">
-            💰 {service.price} Ft
+            💰 {service.price} 
           </p>
         </div>
       </div>
