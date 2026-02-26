@@ -91,7 +91,7 @@ export default function DoctorsPage() {
                   onClick={() =>
                     router.push(`/doctorservices/${doctor._id}`)
                   }
-                  className="mt-4 w-full rounded bg-[#A2A369] py-2 font-bold text-[#36483D] hover:bg-[#BF944A]"
+                  className="mt-4 w-full rounded bg-[#A2A369] py-2 font-bold text-[#36483D] hover:bg-[#BF944A] cursor-pointer"
                 >
                   Szolgáltatások
                 </button>

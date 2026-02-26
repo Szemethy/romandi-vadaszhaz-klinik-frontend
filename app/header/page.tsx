@@ -22,7 +22,7 @@ export default function Header() {
   const desktopBtn = (path: string, label: string) => (
     <button
       onClick={() => router.push(path)}
-      className={`h-12 w-36 cursor-pointer rounded font-bold text-[#36483D] transition-colors
+      className={`h-12 w-36 cursor-pointer rounded font-bold text-[#36483D] transition-colors 
         ${
           pathname === path
             ? "bg-[#BF944A]"
@@ -63,6 +63,9 @@ export default function Header() {
 
 {desktopBtn("/appointments", "Időpontok")}
 {desktopBtn("/infos", "Orvosi jelentések")}
+
+{user.role === "DOCTOR" &&
+    desktopBtn("/timetable", "Rendelési idő")}
           </div>
 
           <div className="md:hidden">
@@ -118,6 +121,9 @@ export default function Header() {
 
 {mobileBtn("/appointments", "Időpontok")}
 {mobileBtn("/infos", "Orvosi jelentések")}
+
+{user.role === "DOCTOR" &&
+    mobileBtn("/timetable", "Rendelési idő")}
         </div>
       )}
     </header>
