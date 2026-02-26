@@ -202,7 +202,7 @@ export default function DoctorServicesPage() {
                         : service._id
                     )
                   }
-                  className="w-full rounded bg-[#A2A369] py-2 font-bold text-[#36483D] hover:bg-[#BF944A]"
+                  className="w-full rounded bg-[#A2A369] py-2 font-bold text-[#36483D] hover:bg-[#BF944A] cursor-pointer"
                 >
                   Időpont foglalás
                 </button>
@@ -211,17 +211,17 @@ export default function DoctorServicesPage() {
                   <div className="mt-4 space-y-3">
                     <input
                       type="date"
-                      className="w-full rounded p-2 text-black"
+                      className="input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:outline-none"
                       value={selectedDate}
                       onChange={(e) => setSelectedDate(e.target.value)}
                     />
 
                     <select
-                      className="w-full rounded p-2 text-black"
+                      className="input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:outline-none"
                       value={selectedHour}
                       onChange={(e) => setSelectedHour(e.target.value)}
                     >
-                      <option value="">Óra kiválasztása</option>
+                      <option  value="">Óra kiválasztása</option>
                       {activeHours.map((hour) => (
                         <option key={hour} value={hour}>
                           {hour}
@@ -230,7 +230,7 @@ export default function DoctorServicesPage() {
                     </select>
 
                     <select
-                      className="w-full rounded p-2 text-black"
+                      className="input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:outline-none"
                       value={selectedMinute}
                       onChange={(e) =>
                         setSelectedMinute(e.target.value)
@@ -252,7 +252,7 @@ export default function DoctorServicesPage() {
 
                     <button
                       onClick={() => handleBooking(service._id)}
-                      className="w-full rounded bg-green-600 py-2 font-bold text-white hover:bg-green-700"
+                      className="w-full rounded bg-green-600 py-2 font-bold text-white hover:bg-green-700 cursor-pointer"
                     >
                       Foglalás megerősítése
                     </button>
