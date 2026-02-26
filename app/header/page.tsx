@@ -70,7 +70,7 @@ export default function Header() {
 
           <div className="md:hidden">
             <button
-              className="rounded-md bg-[#BF944A] p-2 text-[#36483D]"
+              className="cursor-pointer rounded-md bg-[#BF944A] p-2 text-[#36483D]"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               <svg
