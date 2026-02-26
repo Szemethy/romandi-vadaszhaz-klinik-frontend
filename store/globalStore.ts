@@ -15,6 +15,7 @@ export type User = {
   tajNumber: string;
   birthDate?: string;
    gender?: "MALE" | "FEMALE";
+   specialization?: string;
 };
 
 type GlobalStore = {

@@ -22,6 +22,7 @@ type LoginResponse = {
   tajNumber: string;
   birthDate?: string;
    gender?: "MALE" | "FEMALE";
+   specialization?: string;
 };
 
 export default function AuthPage() {
@@ -71,6 +72,7 @@ export default function AuthPage() {
 
       const data: LoginResponse = await res.json();
 
+
       if (!res.ok) {
         throw new Error("Hibás email vagy jelszó");
       }
@@ -86,6 +88,7 @@ export default function AuthPage() {
           tajNumber: data.tajNumber,
           birthDate: data.birthDate,
           gender: data.gender,
+          specialization: data.specialization,
         },
         data.token,
       );
