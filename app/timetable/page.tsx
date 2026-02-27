@@ -7,20 +7,20 @@ import toast from "react-hot-toast";
 import Header from "@/app/header/page";
 
 const days = [
-  "MONDAY",
-  "TUESDAY",
-  "WEDNESDAY",
-  "THURSDAY",
-  "FRIDAY",
-  "SATURDAY",
-  "SUNDAY",
+  "HÉTFŐ",
+  "KEDD",
+  "SZERDA",
+  "CSÜTÖRTÖK",
+  "PÉNTEK",
+  "SZOMBAT",
+  "VASÁRNAP",
 ];
 
 export default function TimetablePage() {
   const { user, token } = useGlobalStore();
   const router = useRouter();
 
-  const [dayOfWeek, setDayOfWeek] = useState("MONDAY");
+  const [dayOfWeek, setDayOfWeek] = useState("HÉTFŐ");
   const [startTime, setStartTime] = useState("08:00");
   const [endTime, setEndTime] = useState("12:00");
   const [slotDuration, setSlotDuration] = useState(30);
@@ -38,45 +38,58 @@ export default function TimetablePage() {
   }, [user, router]);
 
   const handleSubmit = async () => {
-    if (!user || !token) {
-      toast.error("Hiba: Nincs bejelentkezett felhasználó");
-      return;
-    }
+  if (!user || !token) {
+    toast.error("Hiba: Nincs bejelentkezett felhasználó");
+    return;
+  }
 
-    try {
-      setLoading(true);
+  try {
+    setLoading(true);
 
-      const res = await fetch(
-        "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/availability",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            doctor: user.id,
-            dayOfWeek,
-            startTime,
-            endTime,
-            slotDuration,
-          }),
-        }
-      );
+    // --- DEBUG: logoljuk a POST body-t ---
+    console.log("Sending availability:", {
+      // ne küldjük még a doctor-t, de logoljuk, hogy lásd
+      doctor: user.id,
+      dayOfWeek,
+      startTime,
+      endTime,
+      slotDuration,
+    });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Hiba történt");
+    const res = await fetch(
+      "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/availability",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          doctor: user.id,   // ideiglenesen logoljuk, később töröljük
+          dayOfWeek,
+          startTime,
+          endTime,
+          slotDuration,
+        }),
       }
+    );
 
-      toast.success("Rendelési idő sikeresen mentve!");
-    } catch (err: any) {
-      toast.error(err.message || "Mentési hiba");
-    } finally {
-      setLoading(false);
+    // --- DEBUG: logoljuk a választ ---
+    const data = await res.json();
+    console.log("Response:", res.status, data);
+
+    if (!res.ok) {
+      throw new Error(data.message || "Hiba történt");
     }
-  };
+
+    toast.success("Rendelési idő sikeresen mentve!");
+  } catch (err: any) {
+    console.error(err); // hibát is logoljuk
+    toast.error(err.message || "Mentési hiba");
+  } finally {
+    setLoading(false);
+  }
+};
 
   if (loadingPage) {
     return (
