@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useGlobalStore } from "@/store/globalStore";
 import toast from "react-hot-toast";
@@ -25,13 +25,24 @@ export default function TimetablePage() {
   const [endTime, setEndTime] = useState("12:00");
   const [slotDuration, setSlotDuration] = useState(30);
   const [loading, setLoading] = useState(false);
+  const [loadingPage, setLoadingPage] = useState(true); // új: a redirect előtt
 
-  if (!user || user.role !== "DOCTOR") {
-    router.push("/dashboard");
-    return null;
-  }
+  // Redirect csak useEffect-ben
+  useEffect(() => {
+    if (!user) return; // még nincs betöltve
+    if (user.role !== "DOCTOR") {
+      router.push("/dashboard");
+    } else {
+      setLoadingPage(false);
+    }
+  }, [user, router]);
 
   const handleSubmit = async () => {
+    if (!user || !token) {
+      toast.error("Hiba: Nincs bejelentkezett felhasználó");
+      return;
+    }
+
     try {
       setLoading(true);
 
@@ -66,6 +77,14 @@ export default function TimetablePage() {
       setLoading(false);
     }
   };
+
+  if (loadingPage) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#36483D] text-[#A89D62]">
+        Betöltés...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#36483D] text-[#A89D62]">
