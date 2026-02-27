@@ -66,6 +66,11 @@ export default function Header() {
 
 {user.role === "DOCTOR" &&
     desktopBtn("/timetable", "Rendelési idő")}
+    <img
+  src="/giphy.gif"
+  alt="Loading..."
+  className="h-12 w-16 ml-2"
+/>
           </div>
 
           <div className="md:hidden">
