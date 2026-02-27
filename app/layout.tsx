@@ -13,7 +13,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="hu">
       <body>
         <Toaster position="bottom-right" toastOptions={{ duration: 5000 }} />
         {children}
