@@ -161,13 +161,6 @@ npm run build
 * A React alkalmazás teljes mértékben a backend API-ra támaszkodik
 * Swagger UI használata erősen ajánlott fejlesztés közben
 
----
 
-Ha szeretnéd, a következőben tudok segíteni:
-
-* 📁 **projekt mappastruktúra**
-* 🔐 **ProtectedRoute / role-based route guard**
-* 📦 **Axios instance token kezeléssel**
-* 🎨 **konkrét oldalak (Login, Profile, Appointments) React kódja**
 
 
