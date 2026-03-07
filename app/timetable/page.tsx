@@ -1,32 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useGlobalStore } from "@/store/globalStore";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Header from "@/app/header/page";
+import { useGlobalStore } from "@/store/globalStore";
 
-const days = [
-  "HÉTFŐ",
-  "KEDD",
-  "SZERDA",
-  "CSÜTÖRTÖK",
-  "PÉNTEK",
-  "SZOMBAT",
-  "VASÁRNAP",
-];
+const days = ["Hétfő", "Kedd", "Szerda", "Csütörtök", "Péntek", "Szombat", "Vasárnap"];
 
 export default function TimetablePage() {
   const { user, token } = useGlobalStore();
   const router = useRouter();
 
-  const [dayOfWeek, setDayOfWeek] = useState("HÉTFŐ");
+  const [dayOfWeek, setDayOfWeek] = useState("Hétfő");
   const [startTime, setStartTime] = useState("08:00");
   const [endTime, setEndTime] = useState("12:00");
   const [slotDuration, setSlotDuration] = useState(30);
   const [loading, setLoading] = useState(false);
   const [loadingPage, setLoadingPage] = useState(true); // új: a redirect előtt
-
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   // Redirect csak useEffect-ben
   useEffect(() => {
     if (!user) return; // még nincs betöltve
@@ -38,62 +30,66 @@ export default function TimetablePage() {
   }, [user, router]);
 
   const handleSubmit = async () => {
-  if (!user || !token) {
-    toast.error("Hiba: Nincs bejelentkezett felhasználó");
-    return;
-  }
-
-  try {
-    setLoading(true);
-
-    // --- DEBUG: logoljuk a POST body-t ---
-    console.log("Sending availability:", {
-      // ne küldjük még a doctor-t, de logoljuk, hogy lásd
-      doctor: user.id,
-      dayOfWeek,
-      startTime,
-      endTime,
-      slotDuration,
-    });
-
-    const res = await fetch(
-      "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/availability",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          doctor: user.id,   // ideiglenesen logoljuk, később töröljük
-          dayOfWeek,
-          startTime,
-          endTime,
-          slotDuration,
-        }),
-      }
-    );
-
-    // --- DEBUG: logoljuk a választ ---
-    const data = await res.json();
-    console.log("Response:", res.status, data);
-
-    if (!res.ok) {
-      throw new Error(data.message || "Hiba történt");
+    if (!user || !token) {
+      setErrorMessage("Hiba: Nincs bejelentkezett felhasználó");
+      return;
     }
 
-    toast.success("Rendelési idő sikeresen mentve!");
-  } catch (err: any) {
-    console.error(err); // hibát is logoljuk
-    toast.error(err.message || "Mentési hiba");
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      setLoading(true);
+      setErrorMessage(null); // előző hiba törlése
+
+      console.log("Sending availability:", {
+        doctor: user.id,
+        dayOfWeek,
+        startTime,
+        endTime,
+        slotDuration,
+      });
+
+      const res = await fetch(
+        "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/availability",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            doctor: user.id,
+            dayOfWeek,
+            startTime,
+            endTime,
+            slotDuration,
+          }),
+        },
+      );
+
+      const data = await res.json();
+      console.log("Response:", res.status, data);
+
+      if (!res.ok) {
+        // A backend message megjelenítése az űrlapon
+        const msg =
+          data.message || (data.errors ? Object.values(data.errors).join(", ") : "Ismeretlen hiba");
+        setErrorMessage(msg);
+        return; // itt már nem dobunk hibát
+      }
+
+      // Sikeres mentés
+      setErrorMessage(null);
+      toast.success("Rendelési idő sikeresen mentve!");
+    } catch (err: any) {
+      console.error(err);
+      setErrorMessage(err.message || "Mentési hiba");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loadingPage) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#36483D] text-[#A89D62]">
+      <div className="flex min-h-screen items-center justify-center bg-[#36483D] text-[#A89D62]">
         Betöltés...
       </div>
     );
@@ -126,8 +122,8 @@ export default function TimetablePage() {
           {/* Kezdés */}
           <label className="mb-1 block text-sm">Kezdés</label>
           <input
-            type="time"
             className="input-bordered input mb-4 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:outline-none"
+            type="time"
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
           />
@@ -135,8 +131,8 @@ export default function TimetablePage() {
           {/* Befejezés */}
           <label className="mb-1 block text-sm">Befejezés</label>
           <input
-            type="time"
             className="input-bordered input mb-4 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:outline-none"
+            type="time"
             value={endTime}
             onChange={(e) => setEndTime(e.target.value)}
           />
@@ -144,21 +140,23 @@ export default function TimetablePage() {
           {/* Slot */}
           <label className="mb-1 block text-sm">Időtartam (perc)</label>
           <input
-            type="number"
+            className="input-bordered input mb-6 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:outline-none"
             min={5}
             step={5}
-            className="input-bordered input mb-6 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:outline-none"
+            type="number"
             value={slotDuration}
             onChange={(e) => setSlotDuration(Number(e.target.value))}
           />
 
           <button
-            onClick={handleSubmit}
-            disabled={loading}
             className="btn w-full bg-[#A2A369] text-[#36483D] shadow-lg hover:bg-[#BF944A]"
+            disabled={loading}
+            onClick={handleSubmit}
           >
             {loading ? "Mentés..." : "Mentés"}
           </button>
+
+          {errorMessage && <p className="mt-3 text-center text-sm text-red-400">{errorMessage}</p>}
         </div>
       </main>
     </div>
