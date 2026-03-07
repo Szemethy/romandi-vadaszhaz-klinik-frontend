@@ -1,7 +1,4 @@
-Oké, értem 👍
-Az alábbi **README.md** már **kifejezetten a frontend projekthez** van megírva, **teljes összhangban a backend README-vel és az API működésével**. Nyugodtan bemásolhatod a frontend repo gyökerébe.
 
----
 
 # 🖥️ Klinik Időpontfoglaló Rendszer – Frontend
 
