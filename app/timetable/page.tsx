@@ -17,11 +17,12 @@ export default function TimetablePage() {
   const [endTime, setEndTime] = useState("12:00");
   const [slotDuration, setSlotDuration] = useState(30);
   const [loading, setLoading] = useState(false);
-  const [loadingPage, setLoadingPage] = useState(true); // új: a redirect előtt
+  const [loadingPage, setLoadingPage] = useState(true); 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   // Redirect csak useEffect-ben
   useEffect(() => {
-    if (!user) return; // még nincs betöltve
+    if (!user) return; 
     if (user.role !== "DOCTOR") {
       router.push("/dashboard");
     } else {
