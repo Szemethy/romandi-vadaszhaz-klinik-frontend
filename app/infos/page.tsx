@@ -76,6 +76,35 @@ export default function InfosPage() {
     fetchRecords();
   }, [isMounted, token, user]);
 
+  const downloadPDF = async (recordId: string) => {
+    try {
+      const res = await fetch(
+        `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/records/${recordId}/pdf`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (!res.ok) throw new Error("PDF letöltés sikertelen");
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `lelet_${recordId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("PDF letöltési hiba:", error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#36483D] text-[#A89D62]">
       <Header />
@@ -115,6 +144,13 @@ export default function InfosPage() {
                 </p>
 
                 <p className="text-white">{record.description}</p>
+
+                <button
+                  className="mt-4 w-full cursor-pointer rounded bg-[#A2A369] py-2 font-bold text-[#36483D] hover:bg-[#BF944A]"
+                  onClick={() => downloadPDF(record._id)}
+                >
+                  📄 Lelet letöltése (PDF)
+                </button>
               </div>
             ))}
           </div>
