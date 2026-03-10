@@ -14,6 +14,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="hu">
+      {/* <head>
+        <link href="cabin.png" rel="icon" type="image/png" />
+      </head> */}
       <body>
         <Toaster position="bottom-right" toastOptions={{ duration: 5000 }} />
         {children}
