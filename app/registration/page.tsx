@@ -100,13 +100,30 @@ export default function RegistrationPage() {
       <div className="mb-8 flex gap-4">
         <button
           className={`btn ${role === "doctor" ? "btn" : "btn-outline"} text-base text-[#BF944A]`}
-          onClick={() => setRole("doctor")}
+          onClick={() => {
+            setRole("doctor");
+            setFieldErrors({});
+            setFormData((prev) => ({
+              ...prev,
+              tajNumber: "",
+              address: "",
+              specialization: "",
+            }));
+          }}
         >
           Orvosként regisztrálok
         </button>
+
         <button
           className={`btn ${role === "patient" ? "btn" : "btn-outline"} text-base text-[#BF944A]`}
-          onClick={() => setRole("patient")}
+          onClick={() => {
+            setRole("patient");
+            setFieldErrors({});
+            setFormData((prev) => ({
+              ...prev,
+              specialization: "",
+            }));
+          }}
         >
           Páciensként regisztrálok
         </button>
