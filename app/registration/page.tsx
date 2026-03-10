@@ -56,11 +56,10 @@ export default function RegistrationPage() {
       phone: formData.phone,
       birthDate: formData.birthDate,
       role: role === "doctor" ? "DOCTOR" : "PATIENT",
-      gender: role === "patient" ? formData.gender : undefined,
+      gender: formData.gender,
       tajNumber: role === "patient" ? formData.tajNumber : undefined,
       address: role === "patient" ? formData.address : undefined,
-      specialization:
-        role === "doctor" ? formData.specialization : undefined,
+      specialization: role === "doctor" ? formData.specialization : undefined,
     };
 
     try {
@@ -70,7 +69,7 @@ export default function RegistrationPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
-        }
+        },
       );
 
       const data = await res.json();
@@ -124,11 +123,7 @@ export default function RegistrationPage() {
             placeholder="Név"
             onChange={handleChange}
           />
-          {fieldErrors.name && (
-            <p className="mb-2 text-sm text-red-400">
-              {fieldErrors.name}
-            </p>
-          )}
+          {fieldErrors.name && <p className="mb-2 text-sm text-red-400">{fieldErrors.name}</p>}
 
           <input
             className="input-bordered input mb-1 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:ring-0 focus:outline-none"
@@ -137,9 +132,7 @@ export default function RegistrationPage() {
             onChange={handleChange}
           />
           {fieldErrors.birthDate && (
-            <p className="mb-2 text-sm text-red-400">
-              {fieldErrors.birthDate}
-            </p>
+            <p className="mb-2 text-sm text-red-400">{fieldErrors.birthDate}</p>
           )}
 
           {role === "doctor" && (
@@ -151,42 +144,37 @@ export default function RegistrationPage() {
                 onChange={handleChange}
               />
               {fieldErrors.specialization && (
-                <p className="mb-2 text-sm text-red-400">
-                  {fieldErrors.specialization}
-                </p>
+                <p className="mb-2 text-sm text-red-400">{fieldErrors.specialization}</p>
               )}
             </>
           )}
 
+          <select
+            className="input-bordered input mb-1 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:outline-none"
+            name="gender"
+            value={formData.gender}
+            onChange={(e) => {
+              const value = e.target.value;
+              setFormData({ ...formData, gender: value });
+
+              if (fieldErrors.gender) {
+                setFieldErrors((prev) => {
+                  const copy = { ...prev };
+                  delete copy.gender;
+                  return copy;
+                });
+              }
+            }}
+          >
+            <option value="">Nem kiválasztása</option>
+            <option value="MALE">Férfi</option>
+            <option value="FEMALE">Nő</option>
+          </select>
+
+          {fieldErrors.gender && <p className="mb-2 text-sm text-red-400">{fieldErrors.gender}</p>}
+
           {role === "patient" && (
             <>
-              <select
-                name="gender"
-                value={formData.gender}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFormData({ ...formData, gender: value });
-
-                  if (fieldErrors.gender) {
-                    setFieldErrors((prev) => {
-                      const copy = { ...prev };
-                      delete copy.gender;
-                      return copy;
-                    });
-                  }
-                }}
-                className="input-bordered input mb-1 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:outline-none"
-              >
-                <option value="">Nem kiválasztása</option>
-                <option value="MALE">Férfi</option>
-                <option value="FEMALE">Nő</option>
-              </select>
-              {fieldErrors.gender && (
-                <p className="mb-2 text-sm text-red-400">
-                  {fieldErrors.gender}
-                </p>
-              )}
-
               <input
                 className="input-bordered input mb-1 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:ring-0 focus:outline-none"
                 name="tajNumber"
@@ -194,9 +182,7 @@ export default function RegistrationPage() {
                 onChange={handleChange}
               />
               {fieldErrors.tajNumber && (
-                <p className="mb-2 text-sm text-red-400">
-                  {fieldErrors.tajNumber}
-                </p>
+                <p className="mb-2 text-sm text-red-400">{fieldErrors.tajNumber}</p>
               )}
 
               <input
@@ -206,9 +192,7 @@ export default function RegistrationPage() {
                 onChange={handleChange}
               />
               {fieldErrors.address && (
-                <p className="mb-2 text-sm text-red-400">
-                  {fieldErrors.address}
-                </p>
+                <p className="mb-2 text-sm text-red-400">{fieldErrors.address}</p>
               )}
             </>
           )}
@@ -219,11 +203,7 @@ export default function RegistrationPage() {
             placeholder="Telefonszám"
             onChange={handleChange}
           />
-          {fieldErrors.phone && (
-            <p className="mb-2 text-sm text-red-400">
-              {fieldErrors.phone}
-            </p>
-          )}
+          {fieldErrors.phone && <p className="mb-2 text-sm text-red-400">{fieldErrors.phone}</p>}
 
           <input
             className="input-bordered input mb-1 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:ring-0 focus:outline-none"
@@ -232,11 +212,7 @@ export default function RegistrationPage() {
             type="email"
             onChange={handleChange}
           />
-          {fieldErrors.email && (
-            <p className="mb-2 text-sm text-red-400">
-              {fieldErrors.email}
-            </p>
-          )}
+          {fieldErrors.email && <p className="mb-2 text-sm text-red-400">{fieldErrors.email}</p>}
 
           <input
             className="input-bordered input mb-1 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:ring-0 focus:outline-none"
@@ -246,9 +222,7 @@ export default function RegistrationPage() {
             onChange={handleChange}
           />
           {fieldErrors.password && (
-            <p className="mb-2 text-sm text-red-400">
-              {fieldErrors.password}
-            </p>
+            <p className="mb-2 text-sm text-red-400">{fieldErrors.password}</p>
           )}
 
           <button
@@ -270,7 +244,6 @@ export default function RegistrationPage() {
   );
 }
 
-
 // if (!res.ok) {
 //   if (data.error) {
 //     const fieldErrors: Record<string, string> = {};
@@ -290,7 +263,6 @@ export default function RegistrationPage() {
 
 //   return;
 // } Olivér backendje nem küld normális json-t ez ezt oldaná meg....
-
 
 // "use client";
 // import { useState } from "react";
