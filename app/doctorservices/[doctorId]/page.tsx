@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { hu } from "date-fns/locale";
+import dayjs from "dayjs";
 import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import Header from "@/app/header/page";
 import { useGlobalStore } from "@/store/globalStore";
-import dayjs from "dayjs";
-import DatePicker from "react-datepicker";
-import { hu } from "date-fns/locale";
-import "react-datepicker/dist/react-datepicker.css";
 
 type Service = {
   _id: string;
@@ -22,13 +22,13 @@ type Service = {
 export default function DoctorServicesPage() {
   const { doctorId } = useParams();
   const router = useRouter();
-  const { user, token } = useGlobalStore(); 
+  const { user, token } = useGlobalStore();
 
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [openBookingId, setOpenBookingId] = useState<string | null>(null);
-  
+
   // const [selectedDate, setSelectedDate] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
@@ -47,7 +47,7 @@ export default function DoctorServicesPage() {
     const fetchServices = async () => {
       try {
         const res = await fetch(
-          `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/services/${doctorId}`
+          `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/services/${doctorId}`,
         );
 
         const data = await res.json();
@@ -81,159 +81,142 @@ export default function DoctorServicesPage() {
 
   // ✅ BOOKING API HÍVÁS
   const handleBooking = async (serviceId: string) => {
-  setError("");
+    setError("");
 
-  if (!selectedDate || !selectedHour || !selectedMinute) {
-    setError("Minden mező kitöltése kötelező!");
-    return;
-  }
+    if (!selectedDate || !selectedHour || !selectedMinute) {
+      setError("Minden mező kitöltése kötelező!");
+      return;
+    }
 
-  const dayOfWeek = dayjs(selectedDate).day();
+    const dayOfWeek = dayjs(selectedDate).day();
 
-  if (!workingDays.includes(dayOfWeek)) {
-    setError("Az orvos nem rendel ezen a napon!");
-    return;
-  }
+    if (!workingDays.includes(dayOfWeek)) {
+      setError("Az orvos nem rendel ezen a napon!");
+      return;
+    }
 
-  if (!token) {
-    console.log("❌ TOKEN HIÁNYZIK:", token);
-    setError("Nincs jogosultság, kérlek jelentkezz be újra!");
-    return;
-  }
+    if (!token) {
+      console.log("❌ TOKEN HIÁNYZIK:", token);
+      setError("Nincs jogosultság, kérlek jelentkezz be újra!");
+      return;
+    }
 
-  try {
-    const startDateTime = dayjs(selectedDate)
-  .hour(Number(selectedHour))
-  .minute(Number(selectedMinute))
-  .second(0)
-  .toISOString();
-
-    const endDateTime = dayjs(startDateTime)
-      .add(30, "minute")
-      .toISOString();
-
-    const requestBody = {
-      doctor_id: doctorId,
-      service_id: serviceId,
-      startTime: startDateTime,
-      endTime: endDateTime,
-      referral_type: "SELF",
-    };
-
-    console.log("📤 KÜLDÖTT TOKEN:", token);
-    console.log("📤 KÜLDÖTT BODY:", requestBody);
-
-    const res = await fetch(
-      "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/appointments/",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(requestBody),
-      }
-    );
-
-    console.log("📥 STATUS:", res.status);
-
-    const responseText = await res.text();
-    console.log("📥 RAW RESPONSE:", responseText);
-
-    let parsed;
     try {
-      parsed = JSON.parse(responseText);
-    } catch {
-      parsed = responseText;
+      const startDateTime = dayjs(selectedDate)
+        .hour(Number(selectedHour))
+        .minute(Number(selectedMinute))
+        .second(0)
+        .toISOString();
+
+      const endDateTime = dayjs(startDateTime).add(30, "minute").toISOString();
+
+      const requestBody = {
+        doctor_id: doctorId,
+        service_id: serviceId,
+        startTime: startDateTime,
+        endTime: endDateTime,
+        referral_type: "SELF",
+      };
+
+      console.log("📤 KÜLDÖTT TOKEN:", token);
+      console.log("📤 KÜLDÖTT BODY:", requestBody);
+
+      const res = await fetch(
+        "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/appointments/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(requestBody),
+        },
+      );
+
+      console.log("📥 STATUS:", res.status);
+
+      const responseText = await res.text();
+      console.log("📥 RAW RESPONSE:", responseText);
+
+      let parsed;
+      try {
+        parsed = JSON.parse(responseText);
+      } catch {
+        parsed = responseText;
+      }
+
+      console.log("📥 PARSED RESPONSE:", parsed);
+
+      if (!res.ok) {
+        throw new Error(parsed?.message || "Foglalás sikertelen");
+      }
+
+      alert("Sikeres időpontfoglalás!");
+
+      setOpenBookingId(null);
+      setSelectedDate(null);
+      setSelectedHour("");
+      setSelectedMinute("");
+    } catch (err: any) {
+      console.error("🔥 FRONTEND ERROR:", err);
+      setError(err.message || "Hiba történt a foglalás során");
     }
-
-    console.log("📥 PARSED RESPONSE:", parsed);
-
-    if (!res.ok) {
-      throw new Error(parsed?.message || "Foglalás sikertelen");
-    }
-
-    alert("Sikeres időpontfoglalás!");
-
-    setOpenBookingId(null);
-    setSelectedDate(null);
-    setSelectedHour("");
-    setSelectedMinute("");
-  } catch (err: any) {
-    console.error("🔥 FRONTEND ERROR:", err);
-    setError(err.message || "Hiba történt a foglalás során");
-  }
-};
+  };
 
   return (
     <div className="min-h-screen bg-[#36483D] text-[#A89D62]">
       <Header />
 
       <main className="mx-auto max-w-5xl p-8">
-        <h1 className="mb-8 text-3xl font-bold text-[#BF944A]">
-          Szolgáltatások
-        </h1>
+        <h1 className="mb-8 text-3xl font-bold text-[#BF944A]">Szolgáltatások</h1>
 
         {loading ? (
           <p>Betöltés...</p>
         ) : services.length === 0 ? (
-          <p className="text-white font-semibold">
-            Az orvosnak jelenleg nincsenek szolgáltatásai!
-          </p>
+          <p className="font-semibold text-white">Az orvosnak jelenleg nincsenek szolgáltatásai!</p>
         ) : (
           <div className="grid gap-6 md:grid-cols-2">
             {services.map((service) => (
               <div
-                key={service._id}
                 className="rounded-xl border border-[#BF944A]/20 bg-[#6B4A2D] p-6 shadow-lg"
+                key={service._id}
               >
-                <h2 className="mb-2 text-xl font-bold text-[#BF944A]">
-                  {service.topic}
-                </h2>
+                <h2 className="mb-2 text-xl font-bold text-[#BF944A]">{service.topic}</h2>
 
-                <p className="mb-3 text-white">
-                  {service.description}
-                </p>
+                <p className="mb-3 text-white">{service.description}</p>
 
-                <div className="space-y-1 text-sm mb-4">
+                <div className="mb-4 space-y-1 text-sm">
                   <p>📍 {service.location}</p>
-                  <p className="font-bold text-white">
-                    💰 {service.price}
-                  </p>
+                  <p className="font-bold text-white">💰 {service.price}</p>
                 </div>
 
                 <button
+                  className="w-full cursor-pointer rounded bg-[#A2A369] py-2 font-bold text-[#36483D] hover:bg-[#BF944A]"
                   onClick={() =>
-                    setOpenBookingId(
-                      openBookingId === service._id
-                        ? null
-                        : service._id
-                    )
+                    setOpenBookingId(openBookingId === service._id ? null : service._id)
                   }
-                  className="w-full rounded bg-[#A2A369] py-2 font-bold text-[#36483D] hover:bg-[#BF944A] cursor-pointer"
                 >
                   Időpont foglalás
                 </button>
 
                 {openBookingId === service._id && (
                   <div className="mt-4 space-y-3">
-                    
                     <DatePicker
-  selected={selectedDate}
-  onChange={(date) => setSelectedDate(date)}
-  locale={hu}
-  dateFormat="yyyy.MM.dd"
-  minDate={new Date()}
-  placeholderText="Dátum kiválasztása"
-  className="input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:outline-none"
-/>
+                      className="input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:outline-none"
+                      dateFormat="yyyy.MM.dd"
+                      locale={hu}
+                      minDate={new Date()}
+                      placeholderText="Dátum kiválasztása"
+                      selected={selectedDate}
+                      onChange={(date) => setSelectedDate(date)}
+                    />
 
                     <select
                       className="input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:outline-none"
                       value={selectedHour}
                       onChange={(e) => setSelectedHour(e.target.value)}
                     >
-                      <option  value="">Óra kiválasztása</option>
+                      <option value="">Óra kiválasztása</option>
                       {activeHours.map((hour) => (
                         <option key={hour} value={hour}>
                           {hour}
@@ -244,9 +227,7 @@ export default function DoctorServicesPage() {
                     <select
                       className="input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:outline-none"
                       value={selectedMinute}
-                      onChange={(e) =>
-                        setSelectedMinute(e.target.value)
-                      }
+                      onChange={(e) => setSelectedMinute(e.target.value)}
                     >
                       <option value="">Perc</option>
                       {minutes.map((min) => (
@@ -256,15 +237,11 @@ export default function DoctorServicesPage() {
                       ))}
                     </select>
 
-                    {error && (
-                      <p className="text-red-400 font-semibold">
-                        {error}
-                      </p>
-                    )}
+                    {error && <p className="font-semibold text-red-400">{error}</p>}
 
                     <button
+                      className="w-full cursor-pointer rounded bg-green-600 py-2 font-bold text-white hover:bg-green-700"
                       onClick={() => handleBooking(service._id)}
-                      className="w-full rounded bg-green-600 py-2 font-bold text-white hover:bg-green-700 cursor-pointer"
                     >
                       Foglalás megerősítése
                     </button>

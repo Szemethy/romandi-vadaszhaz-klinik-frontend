@@ -60,7 +60,6 @@ export default function AppointmentsPage() {
         console.log("📦 RAW RESPONSE:", text);
 
         let data;
-
         try {
           data = JSON.parse(text);
         } catch {
@@ -84,7 +83,6 @@ export default function AppointmentsPage() {
     if (token) fetchAppointments();
   }, [token]);
 
-  // szerep alapú szűrés
   const filteredAppointments = appointments.filter((app) => {
     if (!user) return false;
 
@@ -104,7 +102,7 @@ export default function AppointmentsPage() {
       const res = await fetch(
         `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/appointments/${id}`,
         {
-          method: "PATCH",
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
@@ -114,6 +112,8 @@ export default function AppointmentsPage() {
       );
 
       if (!res.ok) {
+        const err = await res.json();
+        console.log("BACKEND ERROR:", err);
         throw new Error("Státusz frissítés sikertelen");
       }
 
@@ -143,56 +143,67 @@ export default function AppointmentsPage() {
           <p className="font-semibold text-white">Nincsenek időpontok.</p>
         ) : (
           <div className="space-y-6">
-            {filteredAppointments.map((app) => (
-              <div
-                className="rounded-xl border border-[#BF944A]/20 bg-[#6B4A2D] p-6 shadow-lg"
-                key={app._id}
-              >
-                <h2 className="mb-2 text-xl font-bold text-[#BF944A]">{app.service_id.topic}</h2>
+            {filteredAppointments.map((app) => {
+              const isPast = dayjs(app.startTime).isBefore(dayjs());
 
-                <div className="space-y-1 text-sm text-white">
-                  <p>📍 {app.service_id.location}</p>
+              return (
+                <div
+                  className={`rounded-xl border border-[#BF944A]/20 p-6 shadow-lg transition ${
+                    isPast ? "bg-gray-600/40" : "bg-[#6B4A2D]"
+                  }`}
+                  key={app._id}
+                >
+                  {isPast && (
+                    <div className="mb-2 inline-block rounded bg-gray-500 px-3 py-1 text-xs font-bold text-white">
+                      Nem elérhető
+                    </div>
+                  )}
 
-                  <p>🕒 {dayjs(app.startTime).format("YYYY.MM.DD HH:mm")}</p>
-
-                  <p>👨‍⚕️ Orvos: {app.doctor_id.name}</p>
-
-                  <p>👤 Páciens: {app.patient_id.name}</p>
-
-                  <p>💰 {app.service_id.price}</p>
-
-                  <p
-                    className={`font-bold ${
-                      app.status === "PENDING"
-                        ? "text-yellow-400"
-                        : app.status === "ACCEPTED"
-                          ? "text-green-400"
-                          : "text-red-400"
-                    }`}
+                  <h2
+                    className={`mb-2 text-xl font-bold text-yellow-400 ${isPast ? "line-through" : ""}`}
                   >
-                    Állapot: {app.status}
-                  </p>
-                </div>
+                    {app.service_id.topic}
+                  </h2>
 
-                {user?.role === "DOCTOR" && app.status === "PENDING" && (
-                  <div className="mt-4 flex gap-3">
-                    <button
-                      className="cursor-pointer rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700"
-                      onClick={() => updateStatus(app._id, "ACCEPTED")}
+                  <div className={`space-y-1 text-sm text-white ${isPast ? "line-through" : ""}`}>
+                    <p>📍 {app.service_id.location}</p>
+                    <p>🕒 {dayjs(app.startTime).format("YYYY.MM.DD HH:mm")}</p>
+                    <p>👨‍⚕️ Orvos: {app.doctor_id.name}</p>
+                    <p>👤 Páciens: {app.patient_id.name}</p>
+                    <p>💰 {app.service_id.price}</p>
+                    <p
+                      className={`font-bold ${
+                        app.status === "PENDING"
+                          ? "text-yellow-400"
+                          : app.status === "ACCEPTED"
+                            ? "text-green-400"
+                            : "text-red-400"
+                      }`}
                     >
-                      Elfogad
-                    </button>
-
-                    <button
-                      className="cursor-pointer rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
-                      onClick={() => updateStatus(app._id, "REJECTED")}
-                    >
-                      Elutasít
-                    </button>
+                      Állapot: {app.status}
+                    </p>
                   </div>
-                )}
-              </div>
-            ))}
+
+                  {user?.role === "DOCTOR" && app.status === "PENDING" && !isPast && (
+                    <div className="mt-4 flex gap-3">
+                      <button
+                        className="cursor-pointer rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+                        onClick={() => updateStatus(app._id, "ACCEPTED")}
+                      >
+                        Elfogad
+                      </button>
+
+                      <button
+                        className="cursor-pointer rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+                        onClick={() => updateStatus(app._id, "REJECTED")}
+                      >
+                        Elutasít
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </main>
