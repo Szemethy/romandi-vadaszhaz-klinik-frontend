@@ -192,12 +192,14 @@ export default function AppointmentsPage() {
                           </button>
                         </>
                       )}
-                      <button
-                        className="cursor-pointer rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-                        onClick={() => modifyAppointmentDate(app._id)}
-                      >
-                        Módosítás
-                      </button>
+                      {app.status === "PENDING" && (
+                        <button
+                          className="cursor-pointer rounded bg-orange-500 px-4 py-2 text-white hover:bg-orange-600"
+                          onClick={() => modifyAppointmentDate(app._id)}
+                        >
+                          Módosítás
+                        </button>
+                      )}
                     </div>
                   )}
 
