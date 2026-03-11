@@ -40,24 +40,46 @@ export default function AppointmentsPage() {
 
   useEffect(() => {
     async function fetchAppointments() {
-      try {
-        const res = await fetch(
-          "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/appointments",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+  try {
+    console.log("🔑 TOKEN:", token);
+    console.log("👤 USER:", user);
 
-        const data = await res.json();
-        setAppointments(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error("Hiba:", error);
-      } finally {
-        setLoading(false);
+    const res = await fetch(
+      "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/appointments",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }
+    );
+
+    console.log("📡 RESPONSE STATUS:", res.status);
+
+    const text = await res.text();
+
+    console.log("📦 RAW RESPONSE:", text);
+
+    let data;
+
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = text;
     }
+
+    console.log("📦 PARSED DATA:", data);
+
+    if (!res.ok) {
+      throw new Error("API ERROR");
+    }
+
+    setAppointments(Array.isArray(data) ? data : []);
+  } catch (error) {
+    console.error("🔥 FETCH ERROR:", error);
+  } finally {
+    setLoading(false);
+  }
+}
 
     if (token) fetchAppointments();
   }, [token]);
