@@ -5,6 +5,9 @@ import { useParams, useRouter } from "next/navigation";
 import Header from "@/app/header/page";
 import { useGlobalStore } from "@/store/globalStore";
 import dayjs from "dayjs";
+import DatePicker from "react-datepicker";
+import { hu } from "date-fns/locale";
+import "react-datepicker/dist/react-datepicker.css";
 
 type Service = {
   _id: string;
@@ -25,7 +28,10 @@ export default function DoctorServicesPage() {
   const [loading, setLoading] = useState(true);
 
   const [openBookingId, setOpenBookingId] = useState<string | null>(null);
-  const [selectedDate, setSelectedDate] = useState("");
+  
+  // const [selectedDate, setSelectedDate] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
   const [selectedHour, setSelectedHour] = useState("");
   const [selectedMinute, setSelectedMinute] = useState("");
   const [error, setError] = useState("");
@@ -96,9 +102,11 @@ export default function DoctorServicesPage() {
   }
 
   try {
-    const startDateTime = dayjs(
-      `${selectedDate} ${selectedHour}:${selectedMinute}`
-    ).toISOString();
+    const startDateTime = dayjs(selectedDate)
+  .hour(Number(selectedHour))
+  .minute(Number(selectedMinute))
+  .second(0)
+  .toISOString();
 
     const endDateTime = dayjs(startDateTime)
       .add(30, "minute")
@@ -148,7 +156,7 @@ export default function DoctorServicesPage() {
     alert("Sikeres időpontfoglalás!");
 
     setOpenBookingId(null);
-    setSelectedDate("");
+    setSelectedDate(null);
     setSelectedHour("");
     setSelectedMinute("");
   } catch (err: any) {
@@ -209,12 +217,16 @@ export default function DoctorServicesPage() {
 
                 {openBookingId === service._id && (
                   <div className="mt-4 space-y-3">
-                    <input
-                      type="date"
-                      className="input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:outline-none"
-                      value={selectedDate}
-                      onChange={(e) => setSelectedDate(e.target.value)}
-                    />
+                    
+                    <DatePicker
+  selected={selectedDate}
+  onChange={(date) => setSelectedDate(date)}
+  locale={hu}
+  dateFormat="yyyy.MM.dd"
+  minDate={new Date()}
+  placeholderText="Dátum kiválasztása"
+  className="input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:outline-none"
+/>
 
                     <select
                       className="input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:outline-none"
