@@ -10,21 +10,18 @@ type Appointment = {
   status: "PENDING" | "ACCEPTED" | "REJECTED";
   startTime: string;
   endTime: string;
-
   doctor_id: {
     _id: string;
     name: string;
     specialization: string;
     phone: string;
   };
-
   patient_id: {
     _id: string;
     name: string;
     email: string;
     phone: string;
   };
-
   service_id: {
     topic: string;
     location: string;
@@ -41,37 +38,12 @@ export default function AppointmentsPage() {
   useEffect(() => {
     async function fetchAppointments() {
       try {
-        console.log("🔑 TOKEN:", token);
-        console.log("👤 USER:", user);
-
         const res = await fetch(
           "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/appointments/my",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
+          { headers: { Authorization: `Bearer ${token}` } },
         );
-
-        console.log("📡 RESPONSE STATUS:", res.status);
-
-        const text = await res.text();
-
-        console.log("📦 RAW RESPONSE:", text);
-
-        let data;
-        try {
-          data = JSON.parse(text);
-        } catch {
-          data = text;
-        }
-
-        console.log("📦 PARSED DATA:", data);
-
-        if (!res.ok) {
-          throw new Error("API ERROR");
-        }
-
+        const data = await res.json();
+        if (!res.ok) throw new Error("API ERROR");
         setAppointments(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("🔥 FETCH ERROR:", error);
@@ -79,63 +51,80 @@ export default function AppointmentsPage() {
         setLoading(false);
       }
     }
-
     if (token) fetchAppointments();
   }, [token]);
 
   const filteredAppointments = appointments.filter((app) => {
     if (!user) return false;
-
-    if (user.role === "PATIENT") {
-      return app.patient_id._id === user.id;
-    }
-
-    if (user.role === "DOCTOR") {
-      return app.doctor_id._id === user.id;
-    }
-
+    if (user.role === "PATIENT") return app.patient_id._id === user.id;
+    if (user.role === "DOCTOR") return app.doctor_id._id === user.id;
     return true;
   });
 
+  // Státusz frissítés
   async function updateStatus(id: string, status: "ACCEPTED" | "REJECTED") {
     try {
       const res = await fetch(
         `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/appointments/${id}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify({ status }),
         },
       );
-
-      if (!res.ok) {
-        const err = await res.json();
-        console.log("BACKEND ERROR:", err);
-        throw new Error("Státusz frissítés sikertelen");
-      }
-
+      if (!res.ok) throw new Error("Státusz frissítés sikertelen");
       setAppointments((prev) => prev.map((a) => (a._id === id ? { ...a, status } : a)));
     } catch (error) {
       console.error(error);
     }
   }
 
-  if (loading) {
+  // Dátum módosítás (Orvos)
+  async function modifyAppointmentDate(id: string) {
+    const newDate = prompt("Add meg az új időpontot (YYYY-MM-DD HH:mm):");
+    if (!newDate) return;
+
+    const newStart = dayjs(newDate);
+    if (!newStart.isValid() || newStart.isBefore(dayjs())) {
+      alert("Érvénytelen időpont.");
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/appointments/${id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ startTime: newStart.toISOString() }),
+        },
+      );
+      if (!res.ok) throw new Error("Időpont módosítás sikertelen");
+      setAppointments((prev) =>
+        prev.map((a) => (a._id === id ? { ...a, startTime: newStart.toISOString() } : a)),
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  // Lemondás (Páciens)
+  async function cancelAppointment(id: string) {
+    if (!confirm("Biztosan le szeretnéd mondani az időpontot?")) return;
+    await updateStatus(id, "REJECTED");
+  }
+
+  if (loading)
     return (
       <div className="min-h-screen bg-[#36483D] text-white">
         <Header />
         <div className="p-10">Betöltés...</div>
       </div>
     );
-  }
 
   return (
     <div className="min-h-screen bg-[#36483D] text-[#A89D62]">
       <Header />
-
       <main className="mx-auto max-w-5xl p-8">
         <h1 className="mb-8 text-3xl font-bold text-[#BF944A]">Időpontok</h1>
 
@@ -145,7 +134,6 @@ export default function AppointmentsPage() {
           <div className="space-y-6">
             {filteredAppointments.map((app) => {
               const isPast = dayjs(app.startTime).isBefore(dayjs());
-
               return (
                 <div
                   className={`rounded-xl border border-[#BF944A]/20 p-6 shadow-lg transition ${
@@ -184,20 +172,43 @@ export default function AppointmentsPage() {
                     </p>
                   </div>
 
-                  {user?.role === "DOCTOR" && app.status === "PENDING" && !isPast && (
+                  {/* Orvos gombok */}
+                  {user?.role === "DOCTOR" && !isPast && (
+                    <div className="mt-4 flex gap-3">
+                      {app.status === "PENDING" && (
+                        <>
+                          <button
+                            className="cursor-pointer rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+                            onClick={() => updateStatus(app._id, "ACCEPTED")}
+                          >
+                            Elfogad
+                          </button>
+
+                          <button
+                            className="cursor-pointer rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+                            onClick={() => updateStatus(app._id, "REJECTED")}
+                          >
+                            Elutasít
+                          </button>
+                        </>
+                      )}
+                      <button
+                        className="cursor-pointer rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                        onClick={() => modifyAppointmentDate(app._id)}
+                      >
+                        Módosítás
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Páciens lemondás */}
+                  {user?.role === "PATIENT" && !isPast && (
                     <div className="mt-4 flex gap-3">
                       <button
-                        className="cursor-pointer rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700"
-                        onClick={() => updateStatus(app._id, "ACCEPTED")}
-                      >
-                        Elfogad
-                      </button>
-
-                      <button
                         className="cursor-pointer rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
-                        onClick={() => updateStatus(app._id, "REJECTED")}
+                        onClick={() => cancelAppointment(app._id)}
                       >
-                        Elutasít
+                        Lemondás
                       </button>
                     </div>
                   )}
