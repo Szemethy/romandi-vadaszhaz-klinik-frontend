@@ -109,12 +109,21 @@ export default function AppointmentsPage() {
       .minute(Number(selectedMinute))
       .second(0);
 
+    const newEnd = newStart.add(30, "minute");
+
     if (!newStart.isValid() || newStart.isBefore(dayjs())) {
       alert("Érvénytelen időpont.");
       return;
     }
 
     try {
+      const body = {
+        startTime: newStart.toISOString(),
+        endTime: newEnd.toISOString(),
+      };
+
+      console.log("KÜLDÖTT BODY:", body);
+
       const res = await fetch(
         `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/appointments/${id}`,
         {
@@ -123,16 +132,27 @@ export default function AppointmentsPage() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            startTime: newStart.toISOString(),
-          }),
+          body: JSON.stringify(body),
         },
       );
 
-      if (!res.ok) throw new Error("Időpont módosítás sikertelen");
+      const data = await res.text();
+      console.log("API RESPONSE:", data);
+
+      if (!res.ok) {
+        throw new Error(data);
+      }
 
       setAppointments((prev) =>
-        prev.map((a) => (a._id === id ? { ...a, startTime: newStart.toISOString() } : a)),
+        prev.map((a) =>
+          a._id === id
+            ? {
+                ...a,
+                startTime: newStart.toISOString(),
+                endTime: newEnd.toISOString(),
+              }
+            : a,
+        ),
       );
 
       setOpenModifyId(null);
@@ -140,7 +160,7 @@ export default function AppointmentsPage() {
       setSelectedHour("");
       setSelectedMinute("");
     } catch (error) {
-      console.error(error);
+      console.error("MODIFY ERROR:", error);
     }
   }
 
