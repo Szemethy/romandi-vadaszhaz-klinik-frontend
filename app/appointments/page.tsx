@@ -282,7 +282,7 @@ export default function AppointmentsPage() {
                         minDate={new Date()}
                         placeholderText="Dátum kiválasztása"
                         selected={selectedDate}
-                        onChange={(date) => setSelectedDate(date)}
+                         onChange={(date: Date | null) => setSelectedDate(date)}
                       />
 
                       <select
