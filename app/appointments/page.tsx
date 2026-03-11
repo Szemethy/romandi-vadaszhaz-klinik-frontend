@@ -9,7 +9,7 @@ import { useGlobalStore } from "@/store/globalStore";
 
 type Appointment = {
   _id: string;
-  status: "PENDING" | "ACCEPTED" | "REJECTED";
+  status: "PENDING" | "ACCEPTED" | "REJECTED" | "PROPOSED" | "CANCELLED";
   startTime: string;
   endTime: string;
   doctor_id: {
@@ -76,7 +76,8 @@ export default function AppointmentsPage() {
     return true;
   });
 
-  async function updateStatus(id: string, status: "ACCEPTED" | "REJECTED") {
+  // Bővített típus: CANCELLED státusz is engedélyezve
+  async function updateStatus(id: string, status: "ACCEPTED" | "REJECTED" | "CANCELLED") {
     try {
       const res = await fetch(
         `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/appointments/${id}`,
@@ -143,6 +144,7 @@ export default function AppointmentsPage() {
         throw new Error(data);
       }
 
+      // A módosított időpont PROPOSED státuszba kerül
       setAppointments((prev) =>
         prev.map((a) =>
           a._id === id
@@ -150,6 +152,7 @@ export default function AppointmentsPage() {
                 ...a,
                 startTime: newStart.toISOString(),
                 endTime: newEnd.toISOString(),
+                status: "PROPOSED",
               }
             : a,
         ),
@@ -166,8 +169,7 @@ export default function AppointmentsPage() {
 
   async function cancelAppointment(id: string) {
     if (!confirm("Biztosan le szeretnéd mondani az időpontot?")) return;
-
-    await updateStatus(id, "REJECTED");
+    await updateStatus(id, "CANCELLED"); // itt most CANCELLED a státusz
   }
 
   if (loading)
@@ -191,15 +193,17 @@ export default function AppointmentsPage() {
           <div className="space-y-6">
             {filteredAppointments.map((app) => {
               const isPast = dayjs(app.startTime).isBefore(dayjs());
+              const isUnavailable =
+                isPast || app.status === "REJECTED" || app.status === "CANCELLED";
 
               return (
                 <div
                   className={`rounded-xl border border-[#BF944A]/20 p-6 shadow-lg transition ${
-                    isPast ? "bg-gray-600/40" : "bg-[#6B4A2D]"
+                    isUnavailable ? "bg-gray-600/40" : "bg-[#6B4A2D]"
                   }`}
                   key={app._id}
                 >
-                  {isPast && (
+                  {isUnavailable && (
                     <div className="mb-2 inline-block rounded bg-gray-500 px-3 py-1 text-xs font-bold text-white">
                       Nem elérhető
                     </div>
@@ -207,13 +211,17 @@ export default function AppointmentsPage() {
 
                   <h2
                     className={`mb-2 text-xl font-bold text-yellow-400 ${
-                      isPast ? "line-through" : ""
+                      isUnavailable ? "line-through" : ""
                     }`}
                   >
                     {app.service_id.topic}
                   </h2>
 
-                  <div className={`space-y-1 text-sm text-white ${isPast ? "line-through" : ""}`}>
+                  <div
+                    className={`space-y-1 text-sm text-white ${
+                      isUnavailable ? "line-through" : ""
+                    }`}
+                  >
                     <p>📍 {app.service_id.location}</p>
                     <p>🕒 {dayjs(app.startTime).format("YYYY.MM.DD HH:mm")}</p>
                     <p>👨‍⚕️ Orvos: {app.doctor_id.name}</p>
@@ -226,14 +234,16 @@ export default function AppointmentsPage() {
                           ? "text-yellow-400"
                           : app.status === "ACCEPTED"
                             ? "text-green-400"
-                            : "text-red-400"
+                            : app.status === "PROPOSED"
+                              ? "text-orange-400"
+                              : "text-gray-400"
                       }`}
                     >
                       Állapot: {app.status}
                     </p>
                   </div>
 
-                  {user?.role === "DOCTOR" && !isPast && (
+                  {user?.role === "DOCTOR" && !isUnavailable && (
                     <div className="mt-4 flex gap-3">
                       {app.status === "PENDING" && (
                         <>
@@ -281,7 +291,6 @@ export default function AppointmentsPage() {
                         onChange={(e) => setSelectedHour(e.target.value)}
                       >
                         <option value="">Óra kiválasztása</option>
-
                         {activeHours.map((hour) => (
                           <option key={hour} value={hour}>
                             {hour}
@@ -295,7 +304,6 @@ export default function AppointmentsPage() {
                         onChange={(e) => setSelectedMinute(e.target.value)}
                       >
                         <option value="">Perc</option>
-
                         {minutes.map((min) => (
                           <option key={min} value={min}>
                             {min.toString().padStart(2, "0")}
@@ -312,7 +320,7 @@ export default function AppointmentsPage() {
                     </div>
                   )}
 
-                  {user?.role === "PATIENT" && !isPast && (
+                  {user?.role === "PATIENT" && !isUnavailable && (
                     <div className="mt-4 flex gap-3">
                       <button
                         className="cursor-pointer rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
