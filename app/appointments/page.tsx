@@ -2,6 +2,8 @@
 
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import Header from "@/app/header/page";
 import { useGlobalStore } from "@/store/globalStore";
 
@@ -35,6 +37,14 @@ export default function AppointmentsPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [openModifyId, setOpenModifyId] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedHour, setSelectedHour] = useState("");
+  const [selectedMinute, setSelectedMinute] = useState("");
+
+  const activeHours = Array.from({ length: 8 }, (_, i) => 9 + i);
+  const minutes = [0, 10, 20, 30, 40, 50];
+
   useEffect(() => {
     async function fetchAppointments() {
       try {
@@ -42,8 +52,10 @@ export default function AppointmentsPage() {
           "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/appointments/my",
           { headers: { Authorization: `Bearer ${token}` } },
         );
+
         const data = await res.json();
         if (!res.ok) throw new Error("API ERROR");
+
         setAppointments(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("🔥 FETCH ERROR:", error);
@@ -51,40 +63,52 @@ export default function AppointmentsPage() {
         setLoading(false);
       }
     }
+
     if (token) fetchAppointments();
   }, [token]);
 
   const filteredAppointments = appointments.filter((app) => {
     if (!user) return false;
+
     if (user.role === "PATIENT") return app.patient_id._id === user.id;
     if (user.role === "DOCTOR") return app.doctor_id._id === user.id;
+
     return true;
   });
 
-  // Státusz frissítés
   async function updateStatus(id: string, status: "ACCEPTED" | "REJECTED") {
     try {
       const res = await fetch(
         `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/appointments/${id}`,
         {
           method: "PUT",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
           body: JSON.stringify({ status }),
         },
       );
+
       if (!res.ok) throw new Error("Státusz frissítés sikertelen");
+
       setAppointments((prev) => prev.map((a) => (a._id === id ? { ...a, status } : a)));
     } catch (error) {
       console.error(error);
     }
   }
 
-  // Dátum módosítás (Orvos)
   async function modifyAppointmentDate(id: string) {
-    const newDate = prompt("Add meg az új időpontot (YYYY-MM-DD HH:mm):");
-    if (!newDate) return;
+    if (!selectedDate || !selectedHour || !selectedMinute) {
+      alert("Minden mezőt ki kell tölteni!");
+      return;
+    }
 
-    const newStart = dayjs(newDate);
+    const newStart = dayjs(selectedDate)
+      .hour(Number(selectedHour))
+      .minute(Number(selectedMinute))
+      .second(0);
+
     if (!newStart.isValid() || newStart.isBefore(dayjs())) {
       alert("Érvénytelen időpont.");
       return;
@@ -95,22 +119,34 @@ export default function AppointmentsPage() {
         `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/appointments/${id}`,
         {
           method: "PUT",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ startTime: newStart.toISOString() }),
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            startTime: newStart.toISOString(),
+          }),
         },
       );
+
       if (!res.ok) throw new Error("Időpont módosítás sikertelen");
+
       setAppointments((prev) =>
         prev.map((a) => (a._id === id ? { ...a, startTime: newStart.toISOString() } : a)),
       );
+
+      setOpenModifyId(null);
+      setSelectedDate(null);
+      setSelectedHour("");
+      setSelectedMinute("");
     } catch (error) {
       console.error(error);
     }
   }
 
-  // Lemondás (Páciens)
   async function cancelAppointment(id: string) {
     if (!confirm("Biztosan le szeretnéd mondani az időpontot?")) return;
+
     await updateStatus(id, "REJECTED");
   }
 
@@ -125,6 +161,7 @@ export default function AppointmentsPage() {
   return (
     <div className="min-h-screen bg-[#36483D] text-[#A89D62]">
       <Header />
+
       <main className="mx-auto max-w-5xl p-8">
         <h1 className="mb-8 text-3xl font-bold text-[#BF944A]">Időpontok</h1>
 
@@ -134,6 +171,7 @@ export default function AppointmentsPage() {
           <div className="space-y-6">
             {filteredAppointments.map((app) => {
               const isPast = dayjs(app.startTime).isBefore(dayjs());
+
               return (
                 <div
                   className={`rounded-xl border border-[#BF944A]/20 p-6 shadow-lg transition ${
@@ -148,7 +186,9 @@ export default function AppointmentsPage() {
                   )}
 
                   <h2
-                    className={`mb-2 text-xl font-bold text-yellow-400 ${isPast ? "line-through" : ""}`}
+                    className={`mb-2 text-xl font-bold text-yellow-400 ${
+                      isPast ? "line-through" : ""
+                    }`}
                   >
                     {app.service_id.topic}
                   </h2>
@@ -159,6 +199,7 @@ export default function AppointmentsPage() {
                     <p>👨‍⚕️ Orvos: {app.doctor_id.name}</p>
                     <p>👤 Páciens: {app.patient_id.name}</p>
                     <p>💰 {app.service_id.price}</p>
+
                     <p
                       className={`font-bold ${
                         app.status === "PENDING"
@@ -172,7 +213,6 @@ export default function AppointmentsPage() {
                     </p>
                   </div>
 
-                  {/* Orvos gombok */}
                   {user?.role === "DOCTOR" && !isPast && (
                     <div className="mt-4 flex gap-3">
                       {app.status === "PENDING" && (
@@ -190,20 +230,68 @@ export default function AppointmentsPage() {
                           >
                             Elutasít
                           </button>
+
+                          <button
+                            className="cursor-pointer rounded bg-orange-500 px-4 py-2 text-white hover:bg-orange-600"
+                            onClick={() =>
+                              setOpenModifyId(openModifyId === app._id ? null : app._id)
+                            }
+                          >
+                            Időpont módosítás
+                          </button>
                         </>
-                      )}
-                      {app.status === "PENDING" && (
-                        <button
-                          className="cursor-pointer rounded bg-orange-500 px-4 py-2 text-white hover:bg-orange-600"
-                          onClick={() => modifyAppointmentDate(app._id)}
-                        >
-                          Módosítás
-                        </button>
                       )}
                     </div>
                   )}
 
-                  {/* Páciens lemondás */}
+                  {openModifyId === app._id && (
+                    <div className="mt-4 space-y-3">
+                      <DatePicker
+                        className="input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg"
+                        dateFormat="yyyy.MM.dd"
+                        minDate={new Date()}
+                        placeholderText="Dátum kiválasztása"
+                        selected={selectedDate}
+                        onChange={(date) => setSelectedDate(date)}
+                      />
+
+                      <select
+                        className="input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg"
+                        value={selectedHour}
+                        onChange={(e) => setSelectedHour(e.target.value)}
+                      >
+                        <option value="">Óra kiválasztása</option>
+
+                        {activeHours.map((hour) => (
+                          <option key={hour} value={hour}>
+                            {hour}
+                          </option>
+                        ))}
+                      </select>
+
+                      <select
+                        className="input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg"
+                        value={selectedMinute}
+                        onChange={(e) => setSelectedMinute(e.target.value)}
+                      >
+                        <option value="">Perc</option>
+
+                        {minutes.map((min) => (
+                          <option key={min} value={min}>
+                            {min.toString().padStart(2, "0")}
+                          </option>
+                        ))}
+                      </select>
+
+                      <button
+                        className="w-full cursor-pointer rounded bg-green-600 py-2 font-bold text-white hover:bg-green-700"
+                        onClick={() => modifyAppointmentDate(app._id)}
+                      >
+                        Időpont módosítása
+                      </button>
+                    </div>
+                  )}
+
                   {user?.role === "PATIENT" && !isPast && (
                     <div className="mt-4 flex gap-3">
                       <button
