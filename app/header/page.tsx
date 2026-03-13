@@ -66,6 +66,9 @@ export default function Header() {
 
 {user.role === "DOCTOR" &&
     desktopBtn("/timetable", "Rendelési idő")}
+
+    {user.role === "DOCTOR" &&
+  desktopBtn("/myservices", "Szolgáltatásaim")}
     {/* <img
   src="/giphy.gif"
   alt="Loading..."
@@ -129,6 +132,9 @@ export default function Header() {
 
 {user.role === "DOCTOR" &&
     mobileBtn("/timetable", "Rendelési idő")}
+
+    {user.role === "DOCTOR" &&
+  mobileBtn("/myservices", "Szolgáltatásaim")}
         </div>
       )}
     </header>
