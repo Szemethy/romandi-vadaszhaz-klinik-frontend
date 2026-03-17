@@ -173,12 +173,17 @@ export default function AppointmentsPage() {
   }
 
   if (loading)
-    return (
-      <div className="min-h-screen bg-[#36483D] text-white">
-        <Header />
-        <div className="p-10">Betöltés...</div>
-      </div>
-    );
+  return (
+    <div className="min-h-screen bg-[#36483D] text-[#A89D62]">
+      <Header />
+      <main className="mx-auto max-w-6xl p-8">
+        <h1 className="mb-8 text-3xl font-bold text-[#BF944A]">
+          Időpontok
+        </h1>
+        <p>Betöltés...</p>
+      </main>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-[#36483D] text-[#A89D62]">
