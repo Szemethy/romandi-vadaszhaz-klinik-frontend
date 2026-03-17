@@ -2,12 +2,17 @@
 
 import { hu } from "date-fns/locale";
 import dayjs from "dayjs";
+import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Header from "@/app/header/page";
 import { useGlobalStore } from "@/store/globalStore";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 type Service = {
   _id: string;
@@ -26,12 +31,8 @@ export default function DoctorServicesPage() {
 
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
-
   const [openBookingId, setOpenBookingId] = useState<string | null>(null);
-
-  // const [selectedDate, setSelectedDate] = useState("");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-
   const [selectedHour, setSelectedHour] = useState("");
   const [selectedMinute, setSelectedMinute] = useState("");
   const [error, setError] = useState("");
@@ -49,16 +50,10 @@ export default function DoctorServicesPage() {
         const res = await fetch(
           `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/services/${doctorId}`,
         );
-
         const data = await res.json();
-
-        if (Array.isArray(data)) {
-          setServices(data);
-        } else {
-          setServices([]);
-        }
-      } catch (error) {
-        console.error("Hiba:", error);
+        setServices(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Hiba:", err);
         setServices([]);
       } finally {
         setLoading(false);
@@ -73,7 +68,7 @@ export default function DoctorServicesPage() {
   // 🩺 MOCK rendelési napok (1=Hétfő ... 5=Péntek)
   const workingDays = [1, 2, 3, 4, 5];
 
-  // 🕒 MOCK aktív órák (9-16)
+  // 🕒 MOCK aktív órák (8-16)
   const activeHours = Array.from({ length: 9 }, (_, i) => 8 + i);
 
   // ⏱ percek 10-esével
@@ -89,26 +84,26 @@ export default function DoctorServicesPage() {
     }
 
     const dayOfWeek = dayjs(selectedDate).day();
-
     if (!workingDays.includes(dayOfWeek)) {
       setError("Az orvos nem rendel ezen a napon!");
       return;
     }
 
     if (!token) {
-      console.log("❌ TOKEN HIÁNYZIK:", token);
       setError("Nincs jogosultság, kérlek jelentkezz be újra!");
       return;
     }
 
     try {
+      // explicit Budapest időzóna, helyi idő megtartásával
       const startDateTime = dayjs(selectedDate)
         .hour(Number(selectedHour))
         .minute(Number(selectedMinute))
         .second(0)
-        .toISOString();
+        .tz("Europe/Budapest", true)
+        .format(); // ISO 8601 +01:00 offset
 
-      const endDateTime = dayjs(startDateTime).add(30, "minute").toISOString();
+      const endDateTime = dayjs(startDateTime).add(30, "minute").format();
 
       const requestBody = {
         doctor_id: doctorId,
@@ -133,19 +128,13 @@ export default function DoctorServicesPage() {
         },
       );
 
-      console.log("📥 STATUS:", res.status);
-
       const responseText = await res.text();
-      console.log("📥 RAW RESPONSE:", responseText);
-
       let parsed;
       try {
         parsed = JSON.parse(responseText);
       } catch {
         parsed = responseText;
       }
-
-      console.log("📥 PARSED RESPONSE:", parsed);
 
       if (!res.ok) {
         throw new Error(parsed?.message || "Foglalás sikertelen");
@@ -166,7 +155,6 @@ export default function DoctorServicesPage() {
   return (
     <div className="min-h-screen bg-[#36483D] text-[#A89D62]">
       <Header />
-
       <main className="mx-auto max-w-5xl p-8">
         <h1 className="mb-8 text-3xl font-bold text-[#BF944A]">Szolgáltatások</h1>
 
@@ -182,7 +170,6 @@ export default function DoctorServicesPage() {
                 key={service._id}
               >
                 <h2 className="mb-2 text-xl font-bold text-[#BF944A]">{service.topic}</h2>
-
                 <p className="mb-3 text-white">{service.description}</p>
 
                 <div className="mb-4 space-y-1 text-sm">
