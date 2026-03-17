@@ -21,8 +21,8 @@ type LoginResponse = {
   address: string;
   tajNumber: string;
   birthDate?: string;
-   gender?: "MALE" | "FEMALE";
-   specialization?: string;
+  gender?: "MALE" | "FEMALE";
+  specialization?: string;
 };
 
 export default function AuthPage() {
@@ -71,7 +71,6 @@ export default function AuthPage() {
       );
 
       const data: LoginResponse = await res.json();
-
 
       if (!res.ok) {
         throw new Error("Hibás email vagy jelszó");
@@ -154,6 +153,8 @@ export default function AuthPage() {
         >
           Regisztráció
         </button>
+
+        
 
         {error && (
           <div className="mt-4 mb-4 rounded-md border border-red-400 bg-red-100 p-2 text-sm text-red-700">
