@@ -1,13 +1,7 @@
 "use client";
 
-import { clsx } from "clsx";
-import { log } from "console";
-import dayjs from "dayjs";
-import { SunMoon } from "lucide-react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useGlobalStore } from "@/store/globalStore";
 
@@ -33,9 +27,31 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [enterPressed, setEnterPressed] = useState(false);
+
+  // Enter key listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        setEnterPressed(true);
+      }
+    };
+
+    const handleInput = () => {
+      if (enterPressed) setEnterPressed(false);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("input", handleInput);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("input", handleInput);
+    };
+  }, [enterPressed]);
 
   async function handleLogin() {
-    // whitespace levágás
     const trimmedEmail = email.trim();
     const trimmedPassword = password.trim();
 
@@ -63,11 +79,8 @@ export default function AuthPage() {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: trimmedEmail,
-            password: trimmedPassword,
-          }),
-        },
+          body: JSON.stringify({ email: trimmedEmail, password: trimmedPassword }),
+        }
       );
 
       const data: LoginResponse = await res.json();
@@ -89,7 +102,7 @@ export default function AuthPage() {
           gender: data.gender,
           specialization: data.specialization,
         },
-        data.token,
+        data.token
       );
 
       toast.success(`Sikeres bejelentkezés, ${data.name}!`);
@@ -98,11 +111,11 @@ export default function AuthPage() {
       setError(err instanceof Error ? err.message : "Ismeretlen hiba");
     } finally {
       setLoading(false);
+      setEnterPressed(false); // reset
     }
   }
 
   function handleRegister() {
-    // itt majd később backend ellenőrzés lesz
     router.push("/registration");
   }
 
@@ -138,11 +151,15 @@ export default function AuthPage() {
         />
 
         <button
-          className="btn mb-4 w-full bg-[#BF944A] text-[#36483D] shadow-lg hover:bg-[#A89D62]"
+          className={`btn mb-4 w-full shadow-lg hover:bg-[#A89D62] ${
+            enterPressed
+              ? "bg-yellow-400 text-black animate-pulse"
+              : "bg-[#BF944A] text-[#36483D]"
+          }`}
           disabled={loading}
           onClick={handleLogin}
         >
-          {loading ? "Belépés..." : "Belépés"}
+          {loading ? "Belépés..." : enterPressed ? "KATTINTS IDE" : "Belépés"}
         </button>
 
         <div className="divider my-4 mb-7 border-[#BF944A] text-2xl text-[#BF944A]">vagy</div>
