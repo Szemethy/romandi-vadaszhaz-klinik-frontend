@@ -1,9 +1,9 @@
 "use client";
 
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { useGlobalStore } from "@/store/globalStore";
 import toast from "react-hot-toast";
+import { useGlobalStore } from "@/store/globalStore";
 
 export default function Header() {
   const router = useRouter();
@@ -19,15 +19,20 @@ export default function Header() {
 
   if (!user) return null;
 
+  // 🔥 Role magyarítás
+  const roleMap: Record<string, string> = {
+    ADMIN: "Admin",
+    DOCTOR: "Orvos",
+    PATIENT: "Páciens",
+  };
+  const displayRole = roleMap[user.role] || user.role;
+
   const desktopBtn = (path: string, label: string) => (
     <button
+      className={`h-12 w-36 cursor-pointer rounded font-bold text-[#36483D] transition-colors ${
+        pathname === path ? "bg-[#BF944A]" : "bg-[#A2A369] hover:bg-[#BF944A]"
+      }`}
       onClick={() => router.push(path)}
-      className={`h-12 w-36 cursor-pointer rounded font-bold text-[#36483D] transition-colors 
-        ${
-          pathname === path
-            ? "bg-[#BF944A]"
-            : "bg-[#A2A369] hover:bg-[#BF944A]"
-        }`}
     >
       {label}
     </button>
@@ -35,16 +40,13 @@ export default function Header() {
 
   const mobileBtn = (path: string, label: string) => (
     <button
+      className={`w-full cursor-pointer rounded py-2 font-bold text-[#36483D] transition-colors ${
+        pathname === path ? "bg-[#BF944A]" : "bg-[#A2A369] hover:bg-[#BF944A]"
+      }`}
       onClick={() => {
         router.push(path);
         setIsMenuOpen(false);
       }}
-      className={`w-full cursor-pointer rounded py-2 font-bold text-[#36483D] transition-colors
-        ${
-          pathname === path
-            ? "bg-[#BF944A]"
-            : "bg-[#A2A369] hover:bg-[#BF944A]"
-        }`}
     >
       {label}
     </button>
@@ -57,23 +59,13 @@ export default function Header() {
           <div className="hidden gap-2 md:flex">
             {desktopBtn("/dashboard", "Személyes")}
 
-{user.role !== "DOCTOR" && 
-  desktopBtn("/doctors", "Orvosok")
-}
+            {user.role !== "DOCTOR" && desktopBtn("/doctors", "Orvosok")}
 
-{desktopBtn("/appointments", "Időpontok")}
-{desktopBtn("/infos", "Orvosi jelentések")}
+            {desktopBtn("/appointments", "Időpontok")}
+            {desktopBtn("/infos", "Orvosi jelentések")}
 
-{user.role === "DOCTOR" &&
-    desktopBtn("/timetable", "Rendelési idő")}
-
-    {user.role === "DOCTOR" &&
-  desktopBtn("/myservices", "Szolgáltatásaim")}
-    {/* <img
-  src="/giphy.gif"
-  alt="Loading..."
-  className="h-12 w-16 ml-2"
-/> */}
+            {user.role === "DOCTOR" && desktopBtn("/timetable", "Rendelési idő")}
+            {user.role === "DOCTOR" && desktopBtn("/myservices", "Szolgáltatásaim")}
           </div>
 
           <div className="md:hidden">
@@ -89,11 +81,7 @@ export default function Header() {
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d={
-                    isMenuOpen
-                      ? "M6 18L18 6M6 6l12 12"
-                      : "M4 6h16M4 12h16M4 18h16"
-                  }
+                  d={isMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
@@ -105,13 +93,11 @@ export default function Header() {
 
         <div className="flex items-center gap-4">
           <div className="flex flex-col text-right">
-            <span className="leading-none font-bold text-[#BF944A]">
-              {user.name}
-            </span>
-            <span className="text-xs opacity-70">{user.role}</span>
+            <span className="leading-none font-bold text-[#BF944A]">{user.name}</span>
+            <span className="text-xs opacity-70">{displayRole}</span>
           </div>
           <button
-            className="rounded bg-red-700/80 px-4 py-2 font-bold text-white hover:bg-red-700 cursor-pointer"
+            className="cursor-pointer rounded bg-red-700/80 px-4 py-2 font-bold text-white hover:bg-red-700"
             onClick={handleLogout}
           >
             Kijelentkezés
@@ -123,18 +109,13 @@ export default function Header() {
         <div className="mt-2 flex flex-col gap-2 px-2 pb-2 md:hidden">
           {mobileBtn("/dashboard", "Személyes")}
 
-{user.role !== "DOCTOR" && 
-  mobileBtn("/doctors", "Orvosok")
-}
+          {user.role !== "DOCTOR" && mobileBtn("/doctors", "Orvosok")}
 
-{mobileBtn("/appointments", "Időpontok")}
-{mobileBtn("/infos", "Orvosi jelentések")}
+          {mobileBtn("/appointments", "Időpontok")}
+          {mobileBtn("/infos", "Orvosi jelentések")}
 
-{user.role === "DOCTOR" &&
-    mobileBtn("/timetable", "Rendelési idő")}
-
-    {user.role === "DOCTOR" &&
-  mobileBtn("/myservices", "Szolgáltatásaim")}
+          {user.role === "DOCTOR" && mobileBtn("/timetable", "Rendelési idő")}
+          {user.role === "DOCTOR" && mobileBtn("/myservices", "Szolgáltatásaim")}
         </div>
       )}
     </header>
