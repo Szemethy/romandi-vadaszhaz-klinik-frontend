@@ -6,10 +6,11 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Header from "@/app/header/page";
 import { useGlobalStore } from "@/store/globalStore";
+import { useRouter } from "next/navigation";
 
 type Appointment = {
   _id: string;
-  status: "PENDING" | "ACCEPTED" | "REJECTED" | "PROPOSED" | "CANCELLED";
+  status: "PENDING" | "ACCEPTED" | "REJECTED" | "PROPOSED" | "CANCELLED" | "COMPLETED";
   startTime: string;
   endTime: string;
   doctor_id: {
@@ -33,6 +34,7 @@ type Appointment = {
 
 export default function AppointmentsPage() {
   const { user, token } = useGlobalStore();
+  const router = useRouter();
 
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -50,7 +52,7 @@ export default function AppointmentsPage() {
       try {
         const res = await fetch(
           "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/appointments/my",
-          { headers: { Authorization: `Bearer ${token}` } },
+          { headers: { Authorization: `Bearer ${token}` } }
         );
 
         const data = await res.json();
@@ -69,14 +71,11 @@ export default function AppointmentsPage() {
 
   const filteredAppointments = appointments.filter((app) => {
     if (!user) return false;
-
     if (user.role === "PATIENT") return app.patient_id._id === user.id;
     if (user.role === "DOCTOR") return app.doctor_id._id === user.id;
-
     return true;
   });
 
-  // Bővített típus: CANCELLED státusz is engedélyezve
   async function updateStatus(id: string, status: "ACCEPTED" | "REJECTED" | "CANCELLED") {
     try {
       const res = await fetch(
@@ -88,12 +87,14 @@ export default function AppointmentsPage() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ status }),
-        },
+        }
       );
 
       if (!res.ok) throw new Error("Státusz frissítés sikertelen");
 
-      setAppointments((prev) => prev.map((a) => (a._id === id ? { ...a, status } : a)));
+      setAppointments((prev) =>
+        prev.map((a) => (a._id === id ? { ...a, status } : a))
+      );
     } catch (error) {
       console.error(error);
     }
@@ -118,13 +119,7 @@ export default function AppointmentsPage() {
     }
 
     try {
-      const body = {
-        startTime: newStart.toISOString(),
-        endTime: newEnd.toISOString(),
-      };
-
-      console.log("KÜLDÖTT BODY:", body);
-
+      const body = { startTime: newStart.toISOString(), endTime: newEnd.toISOString() };
       const res = await fetch(
         `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/appointments/${id}`,
         {
@@ -134,28 +129,20 @@ export default function AppointmentsPage() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(body),
-        },
+        }
       );
 
       const data = await res.text();
       console.log("API RESPONSE:", data);
 
-      if (!res.ok) {
-        throw new Error(data);
-      }
+      if (!res.ok) throw new Error(data);
 
-      // A módosított időpont PROPOSED státuszba kerül
       setAppointments((prev) =>
         prev.map((a) =>
           a._id === id
-            ? {
-                ...a,
-                startTime: newStart.toISOString(),
-                endTime: newEnd.toISOString(),
-                status: "PROPOSED",
-              }
-            : a,
-        ),
+            ? { ...a, startTime: newStart.toISOString(), endTime: newEnd.toISOString(), status: "PROPOSED" }
+            : a
+        )
       );
 
       setOpenModifyId(null);
@@ -169,21 +156,19 @@ export default function AppointmentsPage() {
 
   async function cancelAppointment(id: string) {
     if (!confirm("Biztosan le szeretnéd mondani az időpontot?")) return;
-    await updateStatus(id, "CANCELLED"); // itt most CANCELLED a státusz
+    await updateStatus(id, "CANCELLED");
   }
 
   if (loading)
-  return (
-    <div className="min-h-screen bg-[#36483D] text-[#A89D62]">
-      <Header />
-      <main className="mx-auto max-w-6xl p-8">
-        <h1 className="mb-8 text-3xl font-bold text-[#BF944A]">
-          Időpontok
-        </h1>
-        <p>Betöltés...</p>
-      </main>
-    </div>
-  );
+    return (
+      <div className="min-h-screen bg-[#36483D] text-[#A89D62]">
+        <Header />
+        <main className="mx-auto max-w-6xl p-8">
+          <h1 className="mb-8 text-3xl font-bold text-[#BF944A]">Időpontok</h1>
+          <p>Betöltés...</p>
+        </main>
+      </div>
+    );
 
   return (
     <div className="min-h-screen bg-[#36483D] text-[#A89D62]">
@@ -198,15 +183,14 @@ export default function AppointmentsPage() {
           <div className="space-y-6">
             {filteredAppointments.map((app) => {
               const isPast = dayjs(app.startTime).isBefore(dayjs());
-              const isUnavailable =
-                isPast || app.status === "REJECTED" || app.status === "CANCELLED";
+              const isUnavailable = isPast || app.status === "REJECTED" || app.status === "CANCELLED";
 
               return (
                 <div
+                  key={app._id}
                   className={`rounded-xl border border-[#BF944A]/20 p-6 shadow-lg transition ${
                     isUnavailable ? "bg-gray-600/40" : "bg-[#6B4A2D]"
                   }`}
-                  key={app._id}
                 >
                   {isUnavailable && (
                     <div className="mb-2 inline-block rounded bg-gray-500 px-3 py-1 text-xs font-bold text-white">
@@ -223,9 +207,7 @@ export default function AppointmentsPage() {
                   </h2>
 
                   <div
-                    className={`space-y-1 text-sm text-white ${
-                      isUnavailable ? "line-through" : ""
-                    }`}
+                    className={`space-y-1 text-sm text-white ${isUnavailable ? "line-through" : ""}`}
                   >
                     <p>📍 {app.service_id.location}</p>
                     <p>🕒 {dayjs(app.startTime).format("YYYY.MM.DD HH:mm")}</p>
@@ -238,10 +220,12 @@ export default function AppointmentsPage() {
                         app.status === "PENDING"
                           ? "text-yellow-400"
                           : app.status === "ACCEPTED"
-                            ? "text-green-400"
-                            : app.status === "PROPOSED"
-                              ? "text-orange-400"
-                              : "text-gray-400"
+                          ? "text-green-400"
+                          : app.status === "PROPOSED"
+                          ? "text-orange-400"
+                          : app.status === "COMPLETED"
+                          ? "text-blue-400"
+                          : "text-gray-400"
                       }`}
                     >
                       Állapot: {app.status}
@@ -249,7 +233,8 @@ export default function AppointmentsPage() {
                   </div>
 
                   {user?.role === "DOCTOR" && !isUnavailable && (
-                    <div className="mt-4 flex gap-3">
+                    <div className="mt-4 flex flex-col gap-3">
+                      {/* Elfogadás / elutasítás / módosítás */}
                       {app.status === "PENDING" && (
                         <>
                           <button
@@ -276,6 +261,18 @@ export default function AppointmentsPage() {
                           </button>
                         </>
                       )}
+
+                      {/* Lelet készítése gomb a múltbéli ACCEPTED státuszhoz */}
+                      {app.status === "ACCEPTED" &&
+                        app.doctor_id._id === user.id &&
+                        dayjs(app.endTime || app.startTime).isBefore(dayjs()) && (
+                          <button
+                            className="w-full cursor-pointer rounded bg-blue-600 py-2 font-bold text-white hover:bg-blue-700"
+                            onClick={() => router.push(`/newinfo/${app._id}`)}
+                          >
+                            Lelet készítése
+                          </button>
+                        )}
                     </div>
                   )}
 
@@ -287,7 +284,7 @@ export default function AppointmentsPage() {
                         minDate={new Date()}
                         placeholderText="Dátum kiválasztása"
                         selected={selectedDate}
-                         onChange={(date: Date | null) => setSelectedDate(date)}
+                        onChange={(date: Date | null) => setSelectedDate(date)}
                       />
 
                       <select
