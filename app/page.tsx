@@ -154,7 +154,12 @@ export default function AuthPage() {
           Regisztráció
         </button>
 
-        
+        <button
+          className="mt-3 cursor-pointer text-sm text-[#BF944A] underline"
+          onClick={() => router.push("/forgot-password")}
+        >
+          Elfelejtetted a jelszavad?
+        </button>
 
         {error && (
           <div className="mt-4 mb-4 rounded-md border border-red-400 bg-red-100 p-2 text-sm text-red-700">
