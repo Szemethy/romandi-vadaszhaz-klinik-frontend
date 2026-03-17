@@ -155,7 +155,7 @@ export default function AuthPage() {
         </button>
 
         <button
-          className="mt-3 cursor-pointer text-sm text-[#BF944A] underline"
+          className="mx-auto mt-3 block cursor-pointer text-sm text-[#BF944A] underline"
           onClick={() => router.push("/forgot-password")}
         >
           Elfelejtetted a jelszavad?
