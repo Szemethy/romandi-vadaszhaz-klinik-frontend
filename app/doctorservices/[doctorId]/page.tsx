@@ -74,7 +74,7 @@ export default function DoctorServicesPage() {
   const workingDays = [1, 2, 3, 4, 5];
 
   // 🕒 MOCK aktív órák (9-16)
-  const activeHours = Array.from({ length: 9 }, (_, i) => 9 + i);
+  const activeHours = Array.from({ length: 9 }, (_, i) => 8 + i);
 
   // ⏱ percek 10-esével
   const minutes = [0, 10, 20, 30, 40, 50];
@@ -208,7 +208,7 @@ export default function DoctorServicesPage() {
                       minDate={new Date()}
                       placeholderText="Dátum kiválasztása"
                       selected={selectedDate}
-                       onChange={(date: Date | null) => setSelectedDate(date)}
+                      onChange={(date: Date | null) => setSelectedDate(date)}
                     />
 
                     <select
