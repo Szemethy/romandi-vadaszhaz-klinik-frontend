@@ -140,7 +140,14 @@ export default function InfosPage() {
                 )}
 
                 <p className="mb-3 text-sm opacity-80">
-                  📅 {new Date(record.createdAt).toLocaleDateString("hu-HU")}
+                  📅{" "}
+                  {new Date(record.createdAt).toLocaleString("hu-HU", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
                 </p>
 
                 <p className="text-white">{record.description}</p>

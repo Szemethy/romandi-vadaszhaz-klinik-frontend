@@ -112,30 +112,34 @@ export default function NewRecordPage() {
     );
 
   return (
-    <div className="min-h-screen bg-[#36483D] p-8 text-[#A89D62]">
-      <h1 className="mb-6 text-3xl font-bold text-[#BF944A]">Lelet készítése</h1>
+    <div className="min-h-screen bg-[#36483D] text-[#A89D62]">
+      <main className="flex justify-center p-8">
+        <div className="w-full max-w-md rounded-xl bg-[#6B4A2D] p-6 shadow-lg">
+          <h1 className="mb-6 text-center text-2xl font-bold text-[#BF944A]">Lelet készítése</h1>
 
-      <div className="mb-4 rounded-xl bg-[#6B4A2D] p-6 shadow-lg">
-        <p>📍 Szolgáltatás: {appointment.service_id.topic}</p>
-        <p>🕒 Időpont: {dayjs(appointment.startTime).format("YYYY.MM.DD HH:mm")}</p>
-        <p>👤 Páciens: {appointment.patient_id.name}</p>
-      </div>
+          <div className="mb-4 rounded-xl bg-[#4A362D] p-4 text-white shadow-inner">
+            <p>📍 Szolgáltatás: {appointment.service_id.topic}</p>
+            <p>🕒 Időpont: {dayjs(appointment.startTime).format("YYYY.MM.DD HH:mm")}</p>
+            <p>👤 Páciens: {appointment.patient_id.name}</p>
+          </div>
 
-      <textarea
-        className="w-full rounded border border-[#BF944A] bg-[#36483D] p-3 text-white focus:outline-none"
-        placeholder="Írd ide a leletet..."
-        rows={8}
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-      />
+          <textarea
+            className="w-full rounded border border-[#BF944A] bg-[#36483D] p-3 text-white focus:outline-none"
+            placeholder="Írd ide a leletet..."
+            rows={8}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
 
-      <button
-        className="mt-4 w-full rounded bg-green-600 py-2 font-bold text-white hover:bg-green-700"
-        disabled={saving}
-        onClick={handleSave}
-      >
-        {saving ? "Mentés..." : "Lelet mentése"}
-      </button>
+          <button
+            className="mt-4 w-full rounded bg-green-600 py-2 font-bold text-white hover:bg-green-700"
+            disabled={saving}
+            onClick={handleSave}
+          >
+            {saving ? "Mentés..." : "Lelet mentése"}
+          </button>
+        </div>
+      </main>
     </div>
   );
 }
