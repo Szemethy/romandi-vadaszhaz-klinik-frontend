@@ -221,19 +221,19 @@ export default function AppointmentsPage() {
                       {app.status === "PENDING" && !isPast && (
                         <>
                           <button
-                            className="cursor-pointer rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+                            className="cursor-pointer rounded bg-[#A2A369] px-4 py-2 font-bold text-[#36483D] hover:bg-[#BF944A]"
                             onClick={() => updateStatus(app._id, "ACCEPTED")}
                           >
                             Elfogad
                           </button>
                           <button
-                            className="cursor-pointer rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+                            className="cursor-pointer rounded bg-[#A2A369] px-4 py-2 font-bold text-[#36483D] hover:bg-[#BF944A]"
                             onClick={() => updateStatus(app._id, "REJECTED")}
                           >
                             Elutasít
                           </button>
                           <button
-                            className="cursor-pointer rounded bg-orange-500 px-4 py-2 text-white hover:bg-orange-600"
+                            className="cursor-pointer rounded bg-[#A2A369] px-4 py-2 font-bold text-[#36483D] hover:bg-[#BF944A]"
                             onClick={() =>
                               setOpenModifyId(openModifyId === app._id ? null : app._id)
                             }
