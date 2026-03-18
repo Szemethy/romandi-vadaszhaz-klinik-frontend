@@ -157,7 +157,11 @@ export default function AppointmentsPage() {
 
               // Csak a visszautasított vagy lemondott időpont "Unavailable"
               // A múltbeli (isPast) NEM rontja el a kártyát, mert akkor kell leletet írni!
-              const isUnavailable = app.status === "REJECTED" || app.status === "CANCELLED";
+              // const isUnavailable = app.status === "REJECTED" || app.status === "CANCELLED";
+              const isUnavailable =
+                app.status === "REJECTED" ||
+                app.status === "CANCELLED" ||
+                (app.status === "PENDING" && isPast);
 
               return (
                 <div
@@ -168,7 +172,7 @@ export default function AppointmentsPage() {
                 >
                   {isUnavailable && (
                     <div className="mb-2 inline-block rounded bg-gray-500 px-3 py-1 text-xs font-bold text-white">
-                      Nem elérhető (Lemondva/Elutasítva)
+                      Nem elérhető
                     </div>
                   )}
 
