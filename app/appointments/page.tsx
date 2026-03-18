@@ -1,44 +1,28 @@
 "use client";
 
 import dayjs from "dayjs";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Header from "@/app/header/page";
 import { useGlobalStore } from "@/store/globalStore";
-import { useRouter } from "next/navigation";
 
 type Appointment = {
   _id: string;
   status: "PENDING" | "ACCEPTED" | "REJECTED" | "PROPOSED" | "CANCELLED" | "COMPLETED";
   startTime: string;
   endTime: string;
-  doctor_id: {
-    _id: string;
-    name: string;
-    specialization: string;
-    phone: string;
-  };
-  patient_id: {
-    _id: string;
-    name: string;
-    email: string;
-    phone: string;
-  };
-  service_id: {
-    topic: string;
-    location: string;
-    price: string;
-  };
+  doctor_id: { _id: string; name: string; specialization: string; phone: string };
+  patient_id: { _id: string; name: string; email: string; phone: string };
+  service_id: { topic: string; location: string; price: string };
 };
 
 export default function AppointmentsPage() {
   const { user, token } = useGlobalStore();
   const router = useRouter();
-
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
-
   const [openModifyId, setOpenModifyId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedHour, setSelectedHour] = useState("");
@@ -52,12 +36,10 @@ export default function AppointmentsPage() {
       try {
         const res = await fetch(
           "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/appointments/my",
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
-
         const data = await res.json();
         if (!res.ok) throw new Error("API ERROR");
-
         setAppointments(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("🔥 FETCH ERROR:", error);
@@ -65,7 +47,6 @@ export default function AppointmentsPage() {
         setLoading(false);
       }
     }
-
     if (token) fetchAppointments();
   }, [token]);
 
@@ -76,7 +57,7 @@ export default function AppointmentsPage() {
     return true;
   });
 
-  async function updateStatus(id: string, status: "ACCEPTED" | "REJECTED" | "CANCELLED") {
+  async function updateStatus(id: string, status: string) {
     try {
       const res = await fetch(
         `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/appointments/${id}`,
@@ -87,13 +68,11 @@ export default function AppointmentsPage() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ status }),
-        }
+        },
       );
-
       if (!res.ok) throw new Error("Státusz frissítés sikertelen");
-
       setAppointments((prev) =>
-        prev.map((a) => (a._id === id ? { ...a, status } : a))
+        prev.map((a) => (a._id === id ? { ...a, status: status as any } : a)),
       );
     } catch (error) {
       console.error(error);
@@ -105,12 +84,10 @@ export default function AppointmentsPage() {
       alert("Minden mezőt ki kell tölteni!");
       return;
     }
-
     const newStart = dayjs(selectedDate)
       .hour(Number(selectedHour))
       .minute(Number(selectedMinute))
       .second(0);
-
     const newEnd = newStart.add(30, "minute");
 
     if (!newStart.isValid() || newStart.isBefore(dayjs())) {
@@ -129,22 +106,22 @@ export default function AppointmentsPage() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(body),
-        }
+        },
       );
-
-      const data = await res.text();
-      console.log("API RESPONSE:", data);
-
-      if (!res.ok) throw new Error(data);
+      if (!res.ok) throw new Error("Módosítás sikertelen");
 
       setAppointments((prev) =>
         prev.map((a) =>
           a._id === id
-            ? { ...a, startTime: newStart.toISOString(), endTime: newEnd.toISOString(), status: "PROPOSED" }
-            : a
-        )
+            ? {
+                ...a,
+                startTime: newStart.toISOString(),
+                endTime: newEnd.toISOString(),
+                status: "PROPOSED",
+              }
+            : a,
+        ),
       );
-
       setOpenModifyId(null);
       setSelectedDate(null);
       setSelectedHour("");
@@ -152,11 +129,6 @@ export default function AppointmentsPage() {
     } catch (error) {
       console.error("MODIFY ERROR:", error);
     }
-  }
-
-  async function cancelAppointment(id: string) {
-    if (!confirm("Biztosan le szeretnéd mondani az időpontot?")) return;
-    await updateStatus(id, "CANCELLED");
   }
 
   if (loading)
@@ -173,35 +145,35 @@ export default function AppointmentsPage() {
   return (
     <div className="min-h-screen bg-[#36483D] text-[#A89D62]">
       <Header />
-
       <main className="mx-auto max-w-5xl p-8">
         <h1 className="mb-8 text-3xl font-bold text-[#BF944A]">Időpontok</h1>
-
         {filteredAppointments.length === 0 ? (
           <p className="font-semibold text-white">Nincsenek időpontok.</p>
         ) : (
           <div className="space-y-6">
             {filteredAppointments.map((app) => {
-              const isPast = dayjs(app.startTime).isBefore(dayjs());
-              const isUnavailable = isPast || app.status === "REJECTED" || app.status === "CANCELLED";
+              const now = dayjs();
+              const isPast = dayjs(app.startTime).isBefore(now);
+
+              // Csak a visszautasított vagy lemondott időpont "Unavailable"
+              // A múltbeli (isPast) NEM rontja el a kártyát, mert akkor kell leletet írni!
+              const isUnavailable = app.status === "REJECTED" || app.status === "CANCELLED";
 
               return (
                 <div
-                  key={app._id}
                   className={`rounded-xl border border-[#BF944A]/20 p-6 shadow-lg transition ${
                     isUnavailable ? "bg-gray-600/40" : "bg-[#6B4A2D]"
                   }`}
+                  key={app._id}
                 >
                   {isUnavailable && (
                     <div className="mb-2 inline-block rounded bg-gray-500 px-3 py-1 text-xs font-bold text-white">
-                      Nem elérhető
+                      Nem elérhető (Lemondva/Elutasítva)
                     </div>
                   )}
 
                   <h2
-                    className={`mb-2 text-xl font-bold text-yellow-400 ${
-                      isUnavailable ? "line-through" : ""
-                    }`}
+                    className={`mb-2 text-xl font-bold text-yellow-400 ${isUnavailable ? "line-through" : ""}`}
                   >
                     {app.service_id.topic}
                   </h2>
@@ -214,28 +186,28 @@ export default function AppointmentsPage() {
                     <p>👨‍⚕️ Orvos: {app.doctor_id.name}</p>
                     <p>👤 Páciens: {app.patient_id.name}</p>
                     <p>💰 {app.service_id.price}</p>
-
                     <p
                       className={`font-bold ${
                         app.status === "PENDING"
                           ? "text-yellow-400"
                           : app.status === "ACCEPTED"
-                          ? "text-green-400"
-                          : app.status === "PROPOSED"
-                          ? "text-orange-400"
-                          : app.status === "COMPLETED"
-                          ? "text-blue-400"
-                          : "text-gray-400"
+                            ? "text-green-400"
+                            : app.status === "PROPOSED"
+                              ? "text-orange-400"
+                              : app.status === "COMPLETED"
+                                ? "text-blue-400"
+                                : "text-gray-400"
                       }`}
                     >
                       Állapot: {app.status}
                     </p>
                   </div>
 
+                  {/* ORVOSI FUNKCIÓK */}
                   {user?.role === "DOCTOR" && !isUnavailable && (
                     <div className="mt-4 flex flex-col gap-3">
-                      {/* Elfogadás / elutasítás / módosítás */}
-                      {app.status === "PENDING" && (
+                      {/* 1. Jövőbeli függő időpont kezelése */}
+                      {app.status === "PENDING" && !isPast && (
                         <>
                           <button
                             className="cursor-pointer rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700"
@@ -243,14 +215,12 @@ export default function AppointmentsPage() {
                           >
                             Elfogad
                           </button>
-
                           <button
                             className="cursor-pointer rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
                             onClick={() => updateStatus(app._id, "REJECTED")}
                           >
                             Elutasít
                           </button>
-
                           <button
                             className="cursor-pointer rounded bg-orange-500 px-4 py-2 text-white hover:bg-orange-600"
                             onClick={() =>
@@ -262,73 +232,81 @@ export default function AppointmentsPage() {
                         </>
                       )}
 
-                      {/* Lelet készítése gomb a múltbéli ACCEPTED státuszhoz */}
-                      {app.status === "ACCEPTED" &&
-                        app.doctor_id._id === user.id &&
-                        dayjs(app.endTime || app.startTime).isBefore(dayjs()) && (
-                          <button
-                            className="w-full cursor-pointer rounded bg-blue-600 py-2 font-bold text-white hover:bg-blue-700"
-                            onClick={() => router.push(`/newinfo/${app._id}`)}
-                          >
-                            Lelet készítése
-                          </button>
-                        )}
+                      {/* 2. LELET KÉSZÍTÉSE (Ha ACCEPTED és már elmúlt az időpont) */}
+                      {app.status === "ACCEPTED" && isPast && (
+                        <button
+                          className="w-full cursor-pointer rounded bg-blue-600 py-2 font-bold text-white shadow-md hover:bg-blue-700"
+                          onClick={() => router.push(`/newinfo/${app._id}`)}
+                        >
+                          Lelet készítése
+                        </button>
+                      )}
+
+                      {/* 3. Ha már kész a lelet (COMPLETED) */}
+                      {app.status === "COMPLETED" && (
+                        <div className="rounded border border-green-400 py-2 text-center font-bold text-green-400">
+                          ✓ Vizit befejezve (Lelet kész)
+                        </div>
+                      )}
                     </div>
                   )}
 
-                  {openModifyId === app._id && (
-                    <div className="mt-4 space-y-3">
-                      <DatePicker
-                        className="input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg"
-                        dateFormat="yyyy.MM.dd"
-                        minDate={new Date()}
-                        placeholderText="Dátum kiválasztása"
-                        selected={selectedDate}
-                        onChange={(date: Date | null) => setSelectedDate(date)}
-                      />
-
-                      <select
-                        className="input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg"
-                        value={selectedHour}
-                        onChange={(e) => setSelectedHour(e.target.value)}
-                      >
-                        <option value="">Óra kiválasztása</option>
-                        {activeHours.map((hour) => (
-                          <option key={hour} value={hour}>
-                            {hour}
-                          </option>
-                        ))}
-                      </select>
-
-                      <select
-                        className="input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg"
-                        value={selectedMinute}
-                        onChange={(e) => setSelectedMinute(e.target.value)}
-                      >
-                        <option value="">Perc</option>
-                        {minutes.map((min) => (
-                          <option key={min} value={min}>
-                            {min.toString().padStart(2, "0")}
-                          </option>
-                        ))}
-                      </select>
-
+                  {/* PÁCIENS FUNKCIÓK */}
+                  {user?.role === "PATIENT" && !isUnavailable && !isPast && (
+                    <div className="mt-4 flex gap-3">
                       <button
-                        className="w-full cursor-pointer rounded bg-green-600 py-2 font-bold text-white hover:bg-green-700"
-                        onClick={() => modifyAppointmentDate(app._id)}
+                        className="cursor-pointer rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+                        onClick={() => {
+                          if (confirm("Biztosan lemondod?")) updateStatus(app._id, "CANCELLED");
+                        }}
                       >
-                        Időpont módosítása
+                        Lemondás
                       </button>
                     </div>
                   )}
 
-                  {user?.role === "PATIENT" && !isUnavailable && (
-                    <div className="mt-4 flex gap-3">
+                  {/* Módosító felület orvosnak */}
+                  {openModifyId === app._id && (
+                    <div className="mt-4 space-y-3 rounded-lg bg-black/20 p-4">
+                      <DatePicker
+                        className="input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white"
+                        dateFormat="yyyy.MM.dd"
+                        minDate={new Date()}
+                        placeholderText="Dátum kiválasztása"
+                        selected={selectedDate}
+                        onChange={(date) => setSelectedDate(date)}
+                      />
+                      <div className="flex gap-2">
+                        <select
+                          className="input w-full border-[#BF944A] bg-[#36483D] text-white"
+                          value={selectedHour}
+                          onChange={(e) => setSelectedHour(e.target.value)}
+                        >
+                          <option value="">Óra</option>
+                          {activeHours.map((h) => (
+                            <option key={h} value={h}>
+                              {h}
+                            </option>
+                          ))}
+                        </select>
+                        <select
+                          className="input w-full border-[#BF944A] bg-[#36483D] text-white"
+                          value={selectedMinute}
+                          onChange={(e) => setSelectedMinute(e.target.value)}
+                        >
+                          <option value="">Perc</option>
+                          {minutes.map((m) => (
+                            <option key={m} value={m}>
+                              {m.toString().padStart(2, "0")}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                       <button
-                        className="cursor-pointer rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
-                        onClick={() => cancelAppointment(app._id)}
+                        className="w-full rounded bg-green-600 py-2 font-bold text-white"
+                        onClick={() => modifyAppointmentDate(app._id)}
                       >
-                        Lemondás
+                        Módosítás mentése
                       </button>
                     </div>
                   )}
