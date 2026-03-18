@@ -1,10 +1,10 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Header from "@/app/header/page";
 import { useGlobalStore } from "@/store/globalStore";
-import { useRouter } from "next/navigation";
 
 type Service = {
   _id: string;
@@ -44,7 +44,7 @@ export default function MyServicesPage() {
   const fetchServices = async () => {
     try {
       const res = await fetch(
-        `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/services/${user?.id}`
+        `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/services/${user?.id}`,
       );
 
       const data = await res.json();
@@ -72,23 +72,20 @@ export default function MyServicesPage() {
     try {
       setLoading(true);
 
-      const res = await fetch(
-        "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/services",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            doctor_id: user?.id,
-            topic,
-            description,
-            location,
-            price,
-          }),
-        }
-      );
+      const res = await fetch("https://romandi-vadaszhaz-klinik-backend.vercel.app/api/services", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          doctor_id: user?.id,
+          topic,
+          description,
+          location,
+          price,
+        }),
+      });
 
       if (!res.ok) throw new Error("Szolgáltatás létrehozása sikertelen");
 
@@ -119,7 +116,7 @@ export default function MyServicesPage() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (!res.ok) throw new Error("Törlés sikertelen");
@@ -146,15 +143,11 @@ export default function MyServicesPage() {
       <Header />
 
       <main className="mx-auto max-w-5xl p-8">
-        <h1 className="mb-8 text-3xl font-bold text-[#BF944A]">
-          Szolgáltatásaim
-        </h1>
+        <h1 className="mb-8 text-3xl font-bold text-[#BF944A]">Szolgáltatásaim</h1>
 
         {/* ÚJ SERVICE */}
         <div className="mb-10 rounded-xl bg-[#6B4A2D] p-6 shadow-lg">
-          <h2 className="mb-4 text-xl font-bold text-[#BF944A]">
-            Új szolgáltatás
-          </h2>
+          <h2 className="mb-4 text-xl font-bold text-[#BF944A]">Új szolgáltatás</h2>
 
           <div className="grid gap-4 md:grid-cols-2">
             <input
@@ -178,8 +171,8 @@ export default function MyServicesPage() {
               onChange={(e) => setPrice(e.target.value)}
             />
 
-            <input
-              className="input-bordered input border-[#BF944A] bg-[#36483D] text-white"
+            <textarea
+              className="min-h-[120px] w-full resize-y rounded border border-[#BF944A] bg-[#36483D] p-3 text-white md:col-span-2"
               placeholder="Leírás"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -188,8 +181,8 @@ export default function MyServicesPage() {
 
           <button
             className="btn mt-4 w-full bg-[#A2A369] text-[#36483D] hover:bg-[#BF944A]"
-            onClick={createService}
             disabled={loading}
+            onClick={createService}
           >
             {loading ? "Mentés..." : "Szolgáltatás létrehozása"}
           </button>
@@ -202,12 +195,10 @@ export default function MyServicesPage() {
           ) : (
             services.map((service) => (
               <div
-                key={service._id}
                 className="rounded-xl border border-[#BF944A]/20 bg-[#6B4A2D] p-6 shadow-lg"
+                key={service._id}
               >
-                <h2 className="text-xl font-bold text-[#BF944A]">
-                  {service.topic}
-                </h2>
+                <h2 className="text-xl font-bold text-[#BF944A]">{service.topic}</h2>
 
                 <p className="mt-2 text-white">{service.description}</p>
 
@@ -230,4 +221,3 @@ export default function MyServicesPage() {
     </div>
   );
 }
-
