@@ -27,6 +27,8 @@ export default function AppointmentsPage() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedHour, setSelectedHour] = useState("");
   const [selectedMinute, setSelectedMinute] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   const activeHours = Array.from({ length: 8 }, (_, i) => 9 + i);
   const minutes = [0, 10, 20, 30, 40, 50];
@@ -56,6 +58,11 @@ export default function AppointmentsPage() {
     if (user.role === "DOCTOR") return app.doctor_id._id === user.id;
     return true;
   });
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedAppointments = filteredAppointments.slice(startIndex, startIndex + itemsPerPage);
+
+  const totalPages = Math.ceil(filteredAppointments.length / itemsPerPage);
 
   async function updateStatus(id: string, status: string) {
     try {
@@ -151,7 +158,7 @@ export default function AppointmentsPage() {
           <p className="font-semibold text-white">Nincsenek időpontok.</p>
         ) : (
           <div className="space-y-6">
-            {filteredAppointments.map((app) => {
+            {paginatedAppointments.map((app) => {
               const now = dayjs();
               const isPast = dayjs(app.startTime).isBefore(now);
 
@@ -319,6 +326,28 @@ export default function AppointmentsPage() {
             })}
           </div>
         )}
+
+        <div className="mt-6 flex items-center justify-center gap-4">
+          <button
+            className="cursor-pointer rounded bg-[#6B4A2D] px-4 py-2 text-white disabled:opacity-50"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => p - 1)}
+          >
+            Előző
+          </button>
+
+          <span className="text-white">
+            {currentPage} / {totalPages}
+          </span>
+
+          <button
+            className="cursor-pointer rounded bg-[#6B4A2D] px-4 py-2 text-white disabled:opacity-50"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((p) => p + 1)}
+          >
+            Következő
+          </button>
+        </div>
       </main>
     </div>
   );
