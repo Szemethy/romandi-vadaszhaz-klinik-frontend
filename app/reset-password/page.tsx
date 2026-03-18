@@ -1,21 +1,27 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function ResetPasswordPage() {
-  const params = useSearchParams();
   const router = useRouter();
 
-  const email = params.get("email") || "";
-
+  const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const isValid = email && code.length === 6 && password && confirm && password === confirm;
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      setEmail(params.get("email") || "");
+    }
+  }, []);
+
+  const isValid =
+    email && code.length === 6 && password && confirm && password === confirm;
 
   async function handleReset() {
     if (password !== confirm) {
@@ -55,7 +61,9 @@ export default function ResetPasswordPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#36483D] text-[#A89D62]">
       <div className="w-full max-w-md rounded-xl bg-[#6B4A2D] p-6 shadow-lg">
-        <h1 className="mb-6 text-center text-2xl font-bold text-[#BF944A]">Új jelszó beállítása</h1>
+        <h1 className="mb-6 text-center text-2xl font-bold text-[#BF944A]">
+          Új jelszó beállítása
+        </h1>
 
         <input
           className="input mb-3 w-full bg-[#36483D] text-white opacity-70"
