@@ -28,6 +28,12 @@ export default function AppointmentsPage() {
   const [selectedHour, setSelectedHour] = useState("");
   const [selectedMinute, setSelectedMinute] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  useEffect(() => {
+  const el = document.getElementById("pagination-buttons");
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth", block: "end" });
+  }
+}, [currentPage]);
   const itemsPerPage = 5;
 
   const activeHours = Array.from({ length: 8 }, (_, i) => 9 + i);
@@ -327,7 +333,7 @@ export default function AppointmentsPage() {
           </div>
         )}
 
-        <div className="mt-6 flex items-center justify-center gap-4">
+        <div className="mt-6 flex items-center justify-center gap-4" id="pagination-buttons">
           <button
             className="cursor-pointer rounded bg-[#6B4A2D] px-4 py-2 text-white disabled:opacity-50"
             disabled={currentPage === 1}
