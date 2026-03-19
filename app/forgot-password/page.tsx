@@ -61,7 +61,7 @@ export default function ForgotPasswordPage() {
         <h1 className="mb-6 text-center text-2xl font-bold text-[#BF944A]">Jelszó visszaállítás</h1>
 
         <input
-          className="input mb-4 w-full border-[#BF944A] bg-[#36483D] text-white"
+          className="input mb-4 w-full border-[#BF944A] bg-[#36483D] text-white outline-none"
           placeholder="Email"
           type="email"
           value={email}

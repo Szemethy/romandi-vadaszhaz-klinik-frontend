@@ -66,13 +66,13 @@ export default function ResetPasswordPage() {
         </h1>
 
         <input
-          className="input mb-3 w-full bg-[#36483D] text-white opacity-70"
+          className="input mb-3 w-full bg-[#36483D] text-white opacity-70 outline-none"
           disabled
           value={email}
         />
 
         <input
-          className="input mb-3 w-full bg-[#36483D] text-white"
+          className="input mb-3 w-full bg-[#36483D] text-white outline-none"
           maxLength={6}
           placeholder="6 jegyű kód"
           value={code}
@@ -80,7 +80,7 @@ export default function ResetPasswordPage() {
         />
 
         <input
-          className="input mb-3 w-full bg-[#36483D] text-white"
+          className="input mb-3 w-full bg-[#36483D] text-white outline-none"
           placeholder="Új jelszó"
           type="password"
           value={password}
@@ -88,7 +88,7 @@ export default function ResetPasswordPage() {
         />
 
         <input
-          className="input mb-4 w-full bg-[#36483D] text-white"
+          className="input mb-4 w-full bg-[#36483D] text-white outline-none"
           placeholder="Jelszó megerősítése"
           type="password"
           value={confirm}
