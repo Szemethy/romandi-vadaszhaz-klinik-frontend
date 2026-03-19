@@ -62,7 +62,7 @@ export default function AppointmentsPage() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedAppointments = filteredAppointments.slice(startIndex, startIndex + itemsPerPage);
 
-  const totalPages = Math.ceil(filteredAppointments.length / itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(filteredAppointments.length / itemsPerPage));
 
   async function updateStatus(id: string, status: string) {
     try {
@@ -342,7 +342,7 @@ export default function AppointmentsPage() {
 
           <button
             className="cursor-pointer rounded bg-[#6B4A2D] px-4 py-2 text-white disabled:opacity-50"
-            disabled={currentPage === totalPages}
+            disabled={currentPage >= totalPages}
             onClick={() => setCurrentPage((p) => p + 1)}
           >
             Következő
