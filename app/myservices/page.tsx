@@ -28,6 +28,8 @@ export default function MyServicesPage() {
   const [price, setPrice] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
+
   // 🔐 csak DOCTOR
   useEffect(() => {
     if (!user) return;
@@ -44,7 +46,7 @@ export default function MyServicesPage() {
   const fetchServices = async () => {
     try {
       const res = await fetch(
-        `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/services/${user?.id}`,
+        `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/services/${user?.id}`
       );
 
       const data = await res.json();
@@ -62,8 +64,8 @@ export default function MyServicesPage() {
     }
   };
 
-  // ➕ új szolgáltatás
-  const createService = async () => {
+  // ➕ új szolgáltatás vagy 🖊 módosítás
+  const createOrUpdateService = async () => {
     if (!topic || !description || !location || !price) {
       toast.error("Minden mező kitöltése kötelező!");
       return;
@@ -72,8 +74,14 @@ export default function MyServicesPage() {
     try {
       setLoading(true);
 
-      const res = await fetch("https://romandi-vadaszhaz-klinik-backend.vercel.app/api/services", {
-        method: "POST",
+      const url = editingServiceId
+        ? `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/services/${editingServiceId}`
+        : "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/services";
+
+      const method = editingServiceId ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -87,14 +95,16 @@ export default function MyServicesPage() {
         }),
       });
 
-      if (!res.ok) throw new Error("Szolgáltatás létrehozása sikertelen");
+      if (!res.ok)
+        throw new Error(editingServiceId ? "Módosítás sikertelen" : "Szolgáltatás létrehozása sikertelen");
 
-      toast.success("Szolgáltatás létrehozva!");
+      toast.success(editingServiceId ? "Szolgáltatás módosítva!" : "Szolgáltatás létrehozva!");
 
       setTopic("");
       setDescription("");
       setLocation("");
       setPrice("");
+      setEditingServiceId(null);
 
       fetchServices();
     } catch (err: any) {
@@ -116,20 +126,30 @@ export default function MyServicesPage() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        },
+        }
       );
 
       if (!res.ok) throw new Error("Törlés sikertelen");
 
       toast.success("Szolgáltatás törölve");
-
       setServices((prev) => prev.filter((s) => s._id !== serviceId));
     } catch (err: any) {
       toast.error(err.message);
     }
   };
 
-  // ⏳ Loading
+  // 🖊 Módosítás gomb esemény
+  const handleEditService = (service: Service) => {
+    setTopic(service.topic);
+    setDescription(service.description);
+    setLocation(service.location);
+    setPrice(service.price);
+    setEditingServiceId(service._id);
+
+    // Görgetés az oldal tetejére (header-rel együtt)
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   if (loadingPage)
     return (
       <div className="min-h-screen bg-[#36483D] text-white">
@@ -145,9 +165,11 @@ export default function MyServicesPage() {
       <main className="mx-auto max-w-5xl p-8">
         <h1 className="mb-8 text-3xl font-bold text-[#BF944A]">Szolgáltatásaim</h1>
 
-        {/* ÚJ SERVICE */}
+        {/* ÚJ / MODOSÍTÁS FORM */}
         <div className="mb-10 rounded-xl bg-[#6B4A2D] p-6 shadow-lg">
-          <h2 className="mb-4 text-xl font-bold text-[#BF944A]">Új szolgáltatás</h2>
+          <h2 className="mb-4 text-xl font-bold text-[#BF944A]">
+            {editingServiceId ? "Szolgáltatás módosítása" : "Új szolgáltatás"}
+          </h2>
 
           <div className="grid gap-4 md:grid-cols-2">
             <input
@@ -182,9 +204,9 @@ export default function MyServicesPage() {
           <button
             className="btn mt-4 w-full bg-[#A2A369] text-[#36483D] hover:bg-[#BF944A]"
             disabled={loading}
-            onClick={createService}
+            onClick={createOrUpdateService}
           >
-            {loading ? "Mentés..." : "Szolgáltatás létrehozása"}
+            {loading ? "Mentés..." : editingServiceId ? "Módosítás mentése" : "Szolgáltatás létrehozása"}
           </button>
         </div>
 
@@ -207,12 +229,21 @@ export default function MyServicesPage() {
                   <p className="font-bold text-white">💰 {service.price}</p>
                 </div>
 
-                <button
-                  className="mt-4 w-full rounded bg-red-600 py-2 font-bold text-white hover:bg-red-700"
-                  onClick={() => deleteService(service._id)}
-                >
-                  Törlés
-                </button>
+                <div className="mt-4 flex gap-2">
+                  <button
+                    className="flex-1 rounded bg-yellow-500 py-2 font-bold text-white hover:bg-yellow-600"
+                    onClick={() => handleEditService(service)}
+                  >
+                    Módosítás
+                  </button>
+
+                  <button
+                    className="flex-1 rounded bg-red-600 py-2 font-bold text-white hover:bg-red-700"
+                    onClick={() => deleteService(service._id)}
+                  >
+                    Törlés
+                  </button>
+                </div>
               </div>
             ))
           )}
