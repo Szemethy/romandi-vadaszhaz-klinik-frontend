@@ -252,7 +252,7 @@ export default function AppointmentsPage() {
                       {/* 2. LELET KÉSZÍTÉSE (Ha ACCEPTED és már elmúlt az időpont) */}
                       {app.status === "ACCEPTED" && isPast && (
                         <button
-                          className="w-full cursor-pointer rounded bg-[#A2A369] py-2 font-bold text-[#36483D] shadow-md hover:bg-[#BF944A]"
+                          className="btn w-full cursor-pointer rounded bg-[#A2A369] py-2 font-bold text-[#36483D] shadow-md hover:bg-[#BF944A]"
                           onClick={() => router.push(`/newinfo/${app._id}`)}
                         >
                           Lelet készítése
