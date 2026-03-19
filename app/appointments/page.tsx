@@ -28,12 +28,17 @@ export default function AppointmentsPage() {
   const [selectedHour, setSelectedHour] = useState("");
   const [selectedMinute, setSelectedMinute] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+
   useEffect(() => {
-  const el = document.getElementById("pagination-buttons");
-  if (el) {
-    el.scrollIntoView({ behavior: "smooth", block: "end" });
-  }
-}, [currentPage]);
+    const el = document.getElementById("pagination-buttons");
+    if (el) {
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [currentPage]);
+
   const itemsPerPage = 5;
 
   const activeHours = Array.from({ length: 8 }, (_, i) => 9 + i);
@@ -69,6 +74,13 @@ export default function AppointmentsPage() {
   const paginatedAppointments = filteredAppointments.slice(startIndex, startIndex + itemsPerPage);
 
   const totalPages = Math.max(1, Math.ceil(filteredAppointments.length / itemsPerPage));
+
+  // ✅ EZT ADTUK HOZZÁ
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [filteredAppointments.length, totalPages]);
 
   async function updateStatus(id: string, status: string) {
     try {
@@ -168,9 +180,6 @@ export default function AppointmentsPage() {
               const now = dayjs();
               const isPast = dayjs(app.startTime).isBefore(now);
 
-              // Csak a visszautasított vagy lemondott időpont "Unavailable"
-              // A múltbeli (isPast) NEM rontja el a kártyát, mert akkor kell leletet írni!
-              // const isUnavailable = app.status === "REJECTED" || app.status === "CANCELLED";
               const isUnavailable =
                 app.status === "REJECTED" ||
                 app.status === "CANCELLED" ||
@@ -220,10 +229,8 @@ export default function AppointmentsPage() {
                     </p>
                   </div>
 
-                  {/* ORVOSI FUNKCIÓK */}
                   {user?.role === "DOCTOR" && !isUnavailable && (
                     <div className="mt-4 flex flex-col gap-3">
-                      {/* 1. Jövőbeli függő időpont kezelése */}
                       {app.status === "PENDING" && !isPast && (
                         <>
                           <button
@@ -249,7 +256,6 @@ export default function AppointmentsPage() {
                         </>
                       )}
 
-                      {/* 2. LELET KÉSZÍTÉSE (Ha ACCEPTED és már elmúlt az időpont) */}
                       {app.status === "ACCEPTED" && isPast && (
                         <button
                           className="btn w-full cursor-pointer rounded bg-[#A2A369] py-2 font-bold text-[#36483D] shadow-md hover:bg-[#BF944A]"
@@ -259,7 +265,6 @@ export default function AppointmentsPage() {
                         </button>
                       )}
 
-                      {/* 3. Ha már kész a lelet (COMPLETED) */}
                       {app.status === "COMPLETED" && (
                         <div className="rounded border border-green-400 py-2 text-center font-bold text-green-400">
                           ✓ Vizit befejezve (Lelet kész)
@@ -268,7 +273,6 @@ export default function AppointmentsPage() {
                     </div>
                   )}
 
-                  {/* PÁCIENS FUNKCIÓK */}
                   {user?.role === "PATIENT" && !isUnavailable && !isPast && (
                     <div className="mt-4 flex gap-3">
                       <button
@@ -282,7 +286,6 @@ export default function AppointmentsPage() {
                     </div>
                   )}
 
-                  {/* Módosító felület orvosnak */}
                   {openModifyId === app._id && (
                     <div className="mt-4 space-y-3 rounded-lg bg-black/20 p-4">
                       <DatePicker
