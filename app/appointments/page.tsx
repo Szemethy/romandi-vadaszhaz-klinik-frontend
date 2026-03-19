@@ -29,6 +29,15 @@ export default function AppointmentsPage() {
   const [selectedMinute, setSelectedMinute] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
+  const statusLabels: Record<Appointment["status"], string> = {
+    PENDING: "Függőben",
+    ACCEPTED: "Elfogadva",
+    REJECTED: "Elutasítva",
+    PROPOSED: "Javasolt",
+    CANCELLED: "Lemondva",
+    COMPLETED: "Befejezve",
+  };
+
   useEffect(() => {
     const el = document.getElementById("pagination-buttons");
     if (el) {
@@ -225,7 +234,7 @@ export default function AppointmentsPage() {
                                 : "text-gray-400"
                       }`}
                     >
-                      Állapot: {app.status}
+                      Állapot: {statusLabels[app.status]}
                     </p>
                   </div>
 
