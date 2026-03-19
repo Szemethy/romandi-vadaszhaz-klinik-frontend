@@ -30,6 +30,9 @@ export default function MyServicesPage() {
 
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
+
   // 🔐 csak DOCTOR
   useEffect(() => {
     if (!user) return;
@@ -46,7 +49,7 @@ export default function MyServicesPage() {
   const fetchServices = async () => {
     try {
       const res = await fetch(
-        `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/services/${user?.id}`
+        `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/services/${user?.id}`,
       );
 
       const data = await res.json();
@@ -63,6 +66,23 @@ export default function MyServicesPage() {
       setLoadingPage(false);
     }
   };
+
+  const totalPages = Math.max(1, Math.ceil(services.length / itemsPerPage));
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedServices = services.slice(startIndex, startIndex + itemsPerPage);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [services.length, totalPages]);
+
+  useEffect(() => {
+    window.scrollTo({
+      top: document.body.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [currentPage]);
 
   // ➕ új szolgáltatás vagy 🖊 módosítás
   const createOrUpdateService = async () => {
@@ -96,7 +116,9 @@ export default function MyServicesPage() {
       });
 
       if (!res.ok)
-        throw new Error(editingServiceId ? "Módosítás sikertelen" : "Szolgáltatás létrehozása sikertelen");
+        throw new Error(
+          editingServiceId ? "Módosítás sikertelen" : "Szolgáltatás létrehozása sikertelen",
+        );
 
       toast.success(editingServiceId ? "Szolgáltatás módosítva!" : "Szolgáltatás létrehozva!");
 
@@ -126,7 +148,7 @@ export default function MyServicesPage() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
       if (!res.ok) throw new Error("Törlés sikertelen");
@@ -146,7 +168,6 @@ export default function MyServicesPage() {
     setPrice(service.price);
     setEditingServiceId(service._id);
 
-    // Görgetés az oldal tetejére (header-rel együtt)
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -165,7 +186,7 @@ export default function MyServicesPage() {
       <main className="mx-auto max-w-5xl p-8">
         <h1 className="mb-8 text-3xl font-bold text-[#BF944A]">Szolgáltatásaim</h1>
 
-        {/* ÚJ / MODOSÍTÁS FORM */}
+        {/* FORM */}
         <div className="mb-10 rounded-xl bg-[#6B4A2D] p-6 shadow-lg">
           <h2 className="mb-4 text-xl font-bold text-[#BF944A]">
             {editingServiceId ? "Szolgáltatás módosítása" : "Új szolgáltatás"}
@@ -178,21 +199,18 @@ export default function MyServicesPage() {
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
             />
-
             <input
               className="input-bordered input border-[#BF944A] bg-[#36483D] text-white"
               placeholder="Helyszín"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             />
-
             <input
               className="input-bordered input border-[#BF944A] bg-[#36483D] text-white"
-              placeholder="Ár (pl: 25000 Ft)"
+              placeholder="Ár"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
             />
-
             <textarea
               className="min-h-[120px] w-full resize-y rounded border border-[#BF944A] bg-[#36483D] p-3 text-white md:col-span-2"
               placeholder="Leírás"
@@ -202,26 +220,29 @@ export default function MyServicesPage() {
           </div>
 
           <button
-            className="btn mt-4 w-full bg-[#A2A369] text-[#36483D] hover:bg-[#BF944A]"
+            className="btn mt-4 w-full bg-[#A2A369] text-[#36483D]"
             disabled={loading}
             onClick={createOrUpdateService}
           >
-            {loading ? "Mentés..." : editingServiceId ? "Módosítás mentése" : "Szolgáltatás létrehozása"}
+            {loading
+              ? "Mentés..."
+              : editingServiceId
+                ? "Módosítás mentése"
+                : "Szolgáltatás létrehozása"}
           </button>
         </div>
 
-        {/* SERVICE LISTA */}
+        {/* LISTA */}
         <div className="grid gap-6 md:grid-cols-2">
           {services.length === 0 ? (
             <p className="text-white">Nincs még szolgáltatásod.</p>
           ) : (
-            services.map((service) => (
+            paginatedServices.map((service) => (
               <div
                 className="rounded-xl border border-[#BF944A]/20 bg-[#6B4A2D] p-6 shadow-lg"
                 key={service._id}
               >
                 <h2 className="text-xl font-bold text-[#BF944A]">{service.topic}</h2>
-
                 <p className="mt-2 text-white">{service.description}</p>
 
                 <div className="mt-3 text-sm">
@@ -231,14 +252,14 @@ export default function MyServicesPage() {
 
                 <div className="mt-4 flex gap-2">
                   <button
-                    className="flex-1 rounded bg-yellow-500 py-2 font-bold text-white hover:bg-yellow-600"
+                    className="flex-1 rounded bg-yellow-500 py-2 font-bold text-white"
                     onClick={() => handleEditService(service)}
                   >
                     Módosítás
                   </button>
 
                   <button
-                    className="flex-1 rounded bg-red-600 py-2 font-bold text-white hover:bg-red-700"
+                    className="flex-1 rounded bg-red-600 py-2 font-bold text-white"
                     onClick={() => deleteService(service._id)}
                   >
                     Törlés
@@ -247,6 +268,29 @@ export default function MyServicesPage() {
               </div>
             ))
           )}
+        </div>
+
+        {/* PAGINATION */}
+        <div className="mt-6 flex items-center justify-center gap-4">
+          <button
+            className="cursor-pointer rounded bg-[#6B4A2D] px-4 py-2 text-white disabled:opacity-50"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => p - 1)}
+          >
+            Előző
+          </button>
+
+          <span className="text-white">
+            {currentPage} / {totalPages}
+          </span>
+
+          <button
+            className="cursor-pointer rounded bg-[#6B4A2D] px-4 py-2 text-white disabled:opacity-50"
+            disabled={currentPage >= totalPages}
+            onClick={() => setCurrentPage((p) => p + 1)}
+          >
+            Következő
+          </button>
         </div>
       </main>
     </div>
