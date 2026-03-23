@@ -31,6 +31,6 @@ describe("Registration Page - alap tesztek", () => {
   it("hibaüzenet megjelenik, ha mező üresen marad", () => {
     cy.contains("Páciensként regisztrálok").click();
     cy.get('button[type="submit"]').click();
-    cy.get("p.text-red-400").should("exist"); // az input hibák megjelennek
+    cy.get("p.text-red-400").should("exist");
   });
 });
