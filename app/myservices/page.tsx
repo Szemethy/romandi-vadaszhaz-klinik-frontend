@@ -171,13 +171,13 @@ export default function MyServicesPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  if (loadingPage)
-    return (
-      <div className="min-h-screen bg-[#36483D] text-white">
-        <Header />
-        <div className="p-10">Betöltés...</div>
-      </div>
-    );
+  // if (loadingPage)
+  //   return (
+  //     <div className="min-h-screen bg-[#36483D] text-white">
+  //       <Header />
+  //       <div className="p-10">Betöltés...</div>
+  //     </div>
+  //   );
 
   return (
     <div className="min-h-screen bg-[#36483D] text-[#A89D62]">
