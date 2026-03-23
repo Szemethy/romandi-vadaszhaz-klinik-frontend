@@ -234,7 +234,6 @@ export default function AppointmentsPage() {
                                 : "text-gray-400"
                       }`}
                     >
-                      Állapot: {app.status}
                       Állapot: {statusLabels[app.status]}
                     </p>
                   </div>
