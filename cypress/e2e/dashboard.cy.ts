@@ -1,6 +1,5 @@
 describe("Dashboard oldal (mockolt, hibamentes)", () => {
   beforeEach(() => {
-    // 🔥 LOGIN MOCK
     cy.intercept("POST", "**/api/users/login", {
       statusCode: 200,
       body: {
@@ -17,7 +16,6 @@ describe("Dashboard oldal (mockolt, hibamentes)", () => {
       },
     }).as("login");
 
-    // 🔥 PROFILE UPDATE MOCK
     cy.intercept("PUT", "**/api/users/profile", {
       statusCode: 200,
       body: {
@@ -31,7 +29,6 @@ describe("Dashboard oldal (mockolt, hibamentes)", () => {
       },
     }).as("updateProfile");
 
-    // 👉 Login UI-n keresztül (de mockolva)
     cy.visit("http://localhost:8080/");
 
     cy.get('input[type="email"]').type("test@test.com");
