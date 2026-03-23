@@ -51,42 +51,77 @@ export default function NewRecordPage() {
   }, [token, appointmentId]);
 
   async function handleSave() {
-    if (!description.trim()) {
-      toast.error("A lelet szöveg mező nem lehet üres");
-      return;
-    }
-    if (!token || !appointment) return;
+  if (!description.trim()) {
+    toast.error("A lelet szöveg mező nem lehet üres");
+    return;
+  }
+  if (!token || !appointment) return;
 
-    setSaving(true);
+  setSaving(true);
 
-    try {
-      const body = {
-        patient: appointment.patient_id._id,
-        appointment_id: appointment._id,
-        service: appointment.service_id._id,
-        description: description.trim(),
-      };
+  try {
+    const body = {
+      patient: appointment.patient_id._id,
+      appointment_id: appointment._id,
+      service: appointment.service_id._id,
+      description: description.trim(),
+    };
 
-      const res = await fetch(`https://romandi-vadaszhaz-klinik-backend.vercel.app/api/records`, {
+    const res = await fetch(
+      `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/records`,
+      {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(body),
+      }
+    );
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("🔥 Backend hiba!", {
+        status: res.status,
+        statusText: res.statusText,
+        body: text,
       });
-
-      if (!res.ok) throw new Error("Lelet mentése sikertelen");
-
-      toast.success("Lelet sikeresen létrehozva!");
-      router.push("/appointments"); // vissza az időpontokhoz
-    } catch (error) {
-      console.error(error);
-      toast.error(error instanceof Error ? error.message : "Hiba történt");
-    } finally {
-      setSaving(false);
+      throw new Error("Lelet mentése sikertelen");
     }
+
+    toast.success("Lelet sikeresen létrehozva!");
+
+    const statusRes = await fetch(
+      `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/appointments/${appointment._id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: "COMPLETED" }),
+      }
+    );
+
+    if (!statusRes.ok) {
+      const text = await statusRes.text();
+      console.error("🔥 Státusz frissítés hiba!", {
+        status: statusRes.status,
+        statusText: statusRes.statusText,
+        body: text,
+      });
+      throw new Error("Appointment státusz frissítés sikertelen");
+    }
+
+    
+    router.push("/appointments");
+  } catch (error) {
+    console.error("🔥 HANDLE SAVE ERROR:", error);
+    toast.error(error instanceof Error ? error.message : "Hiba történt");
+  } finally {
+    setSaving(false);
   }
+}
 
   if (loading)
     return (
