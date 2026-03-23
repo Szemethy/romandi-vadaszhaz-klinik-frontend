@@ -131,80 +131,81 @@ export default function InfosPage() {
       <main className="mx-auto max-w-6xl p-8">
         <h1 className="mb-8 text-3xl font-bold text-[#BF944A]">Orvosi leletek</h1>
 
-        {loading ? (
+        {/* IDEIGLENESEN KIKOMMENTELVE A LOADING / ERROR LOGIKA */}
+        {/* {loading ? (
           <p>Betöltés...</p>
         ) : error ? (
           <p className="text-red-500">{error}</p>
         ) : records.length === 0 ? (
           <p>Nincsenek elérhető leletek.</p>
-        ) : (
-          <>
-            <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
-              {paginatedRecords.map((record) => (
-                <div
-                  className="rounded-xl border border-[#BF944A]/20 bg-[#6B4A2D] p-6 shadow-lg"
-                  key={record._id}
-                >
-                  <h2 className="mb-2 text-xl font-bold text-[#BF944A]">{record.service.topic}</h2>
+        ) : ( */}
+        <>
+          <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-2">
+            {paginatedRecords.map((record) => (
+              <div
+                className="rounded-xl border border-[#BF944A]/20 bg-[#6B4A2D] p-6 shadow-lg"
+                key={record._id}
+              >
+                <h2 className="mb-2 text-xl font-bold text-[#BF944A]">{record.service.topic}</h2>
 
-                  <p className="mb-1 text-sm opacity-80">📍 {record.service.location}</p>
+                <p className="mb-1 text-sm opacity-80">📍 {record.service.location}</p>
 
+                <p className="mb-1 text-sm opacity-80">
+                  👨‍⚕️ Orvos: {record.doctor.name} ({record.doctor.specialization})
+                </p>
+
+                {user && user.role === "DOCTOR" && (
                   <p className="mb-1 text-sm opacity-80">
-                    👨‍⚕️ Orvos: {record.doctor.name} ({record.doctor.specialization})
+                    🧑 Páciens: {record.patient.name} (TAJ: {record.patient.tajNumber})
                   </p>
+                )}
 
-                  {user && user.role === "DOCTOR" && (
-                    <p className="mb-1 text-sm opacity-80">
-                      🧑 Páciens: {record.patient.name} (TAJ: {record.patient.tajNumber})
-                    </p>
-                  )}
+                <p className="mb-3 text-sm opacity-80">
+                  📅{" "}
+                  {new Date(record.createdAt).toLocaleString("hu-HU", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
 
-                  <p className="mb-3 text-sm opacity-80">
-                    📅{" "}
-                    {new Date(record.createdAt).toLocaleString("hu-HU", {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
+                <p className="text-white">{record.description}</p>
 
-                  <p className="text-white">{record.description}</p>
+                <button
+                  className="btn mt-4 w-full cursor-pointer rounded bg-[#A2A369] py-2 font-bold text-[#36483D] hover:bg-[#BF944A]"
+                  onClick={() => downloadPDF(record._id)}
+                >
+                  📄 Lelet letöltése (PDF)
+                </button>
+              </div>
+            ))}
+          </div>
 
-                  <button
-                    className="btn mt-4 w-full cursor-pointer rounded bg-[#A2A369] py-2 font-bold text-[#36483D] hover:bg-[#BF944A]"
-                    onClick={() => downloadPDF(record._id)}
-                  >
-                    📄 Lelet letöltése (PDF)
-                  </button>
-                </div>
-              ))}
-            </div>
+          <div className="mt-6 flex items-center justify-center gap-4">
+            <button
+              className="cursor-pointer rounded bg-[#6B4A2D] px-4 py-2 text-white disabled:opacity-50"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((p) => p - 1)}
+            >
+              Előző
+            </button>
 
-            <div className="mt-6 flex items-center justify-center gap-4">
-              <button
-                className="cursor-pointer rounded bg-[#6B4A2D] px-4 py-2 text-white disabled:opacity-50"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => p - 1)}
-              >
-                Előző
-              </button>
+            <span className="text-white">
+              {currentPage} / {totalPages}
+            </span>
 
-              <span className="text-white">
-                {currentPage} / {totalPages}
-              </span>
-
-              <button
-                className="cursor-pointer rounded bg-[#6B4A2D] px-4 py-2 text-white disabled:opacity-50"
-                disabled={currentPage >= totalPages}
-                onClick={() => setCurrentPage((p) => p + 1)}
-              >
-                Következő
-              </button>
-            </div>
-          </>
-        )}
+            <button
+              className="cursor-pointer rounded bg-[#6B4A2D] px-4 py-2 text-white disabled:opacity-50"
+              disabled={currentPage >= totalPages}
+              onClick={() => setCurrentPage((p) => p + 1)}
+            >
+              Következő
+            </button>
+          </div>
+        </>
+        {/* )} */}
       </main>
     </div>
   );
