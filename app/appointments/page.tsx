@@ -16,6 +16,8 @@ type Appointment = {
   doctor_id: { _id: string; name: string; specialization: string; phone: string };
   patient_id: { _id: string; name: string; email: string; phone: string };
   service_id: { topic: string; location: string; price: string };
+  referral_type?: "SELF" | "DOCTOR";
+  referred_by?: { _id: string; name: string; specialization?: string };
 };
 
 export default function AppointmentsPage() {
@@ -247,6 +249,13 @@ export default function AppointmentsPage() {
                     <p>👨‍⚕️ Orvos: {app.doctor_id.name}</p>
                     <p>👤 Páciens: {app.patient_id.name}</p>
                     <p>💰 {app.service_id.price}</p>
+
+                    {/* ✅ Új: referral forrás megjelenítése */}
+                    {app.referral_type === "SELF" && <p>📌 Forrás: Saját beutalás</p>}
+                    {app.referral_type === "DOCTOR" && app.referred_by && (
+                      <p>📌 Beutaló orvos: {app.referred_by.name}</p>
+                    )}
+
                     <p
                       className={`font-bold ${
                         app.status === "PENDING"
@@ -263,8 +272,6 @@ export default function AppointmentsPage() {
                       Állapot: {statusLabels[app.status]}
                     </p>
                   </div>
-
-                  {/* ... A további gombok és módosítási logika marad ugyanaz ... */}
                 </div>
               );
             })}
