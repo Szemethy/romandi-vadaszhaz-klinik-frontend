@@ -139,16 +139,18 @@ export default function TimetablePage() {
             onChange={(e) => setEndTime(e.target.value)}
           />
 
-          {/* Slot */}
-          <label className="mb-1 block text-sm">Időtartam (perc)</label>
-          <input
-            className="input-bordered input mb-6 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:outline-none"
-            min={5}
-            step={5}
-            type="number"
-            value={slotDuration}
-            onChange={(e) => setSlotDuration(Number(e.target.value))}
-          />
+{/* 
+  Slot
+  <label className="mb-1 block text-sm">Időtartam (perc)</label>
+  <input
+    className="input-bordered input mb-6 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:outline-none"
+    min={5}
+    step={5}
+    type="number"
+    value={slotDuration}
+    onChange={(e) => setSlotDuration(Number(e.target.value))}
+  />
+*/}
 
           <button
             className="btn w-full bg-[#A2A369] text-[#36483D] shadow-lg hover:bg-[#BF944A]"
