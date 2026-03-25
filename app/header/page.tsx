@@ -29,7 +29,7 @@ export default function Header() {
 
   const desktopBtn = (path: string, label: string) => (
     <button
-      className={`h-12 w-36 cursor-pointer rounded font-bold text-[#36483D] transition-colors ${
+      className={`h-12 min-w-[80px] cursor-pointer rounded px-4 font-bold text-[#36483D] transition-colors ${
         pathname === path ? "bg-[#BF944A]" : "bg-[#A2A369] hover:bg-[#BF944A]"
       }`}
       onClick={() => router.push(path)}
@@ -56,19 +56,18 @@ export default function Header() {
     <header className="border-b border-[#BF944A]/20 bg-[#6B4A2D] px-4 shadow-lg md:px-6">
       <div className="flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="hidden gap-2 md:flex">
+          {/* Desktop gombok: csak nagyobb mérettől */}
+          <div className="hidden flex-wrap gap-2 lg:flex">
             {desktopBtn("/dashboard", "Személyes")}
-
             {user.role !== "DOCTOR" && desktopBtn("/doctors", "Orvosok")}
-
             {desktopBtn("/appointments", "Időpontok")}
             {desktopBtn("/infos", "Orvosi jelentések")}
-
             {user.role === "DOCTOR" && desktopBtn("/timetable", "Rendelési idő")}
             {user.role === "DOCTOR" && desktopBtn("/myservices", "Szolgáltatásaim")}
           </div>
 
-          <div className="md:hidden">
+          {/* Hamburger menü: tablet és mobil */}
+          <div className="lg:hidden">
             <button
               className="cursor-pointer rounded-md bg-[#BF944A] p-2 text-[#36483D]"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -91,6 +90,7 @@ export default function Header() {
           </div>
         </div>
 
+        {/* Felhasználó adatai és kijelentkezés */}
         <div className="flex items-center gap-4">
           <div className="flex flex-col text-right">
             <span className="leading-none font-bold text-[#BF944A]">{user.name}</span>
@@ -105,17 +105,21 @@ export default function Header() {
         </div>
       </div>
 
+      {/* Hamburger menü tartalom */}
       {isMenuOpen && (
-        <div className="mt-2 flex flex-col gap-2 px-2 pb-2 md:hidden">
+        <div className="mt-2 flex flex-col gap-2 px-2 pb-2 lg:hidden">
           {mobileBtn("/dashboard", "Személyes")}
-
           {user.role !== "DOCTOR" && mobileBtn("/doctors", "Orvosok")}
-
           {mobileBtn("/appointments", "Időpontok")}
           {mobileBtn("/infos", "Orvosi jelentések")}
-
           {user.role === "DOCTOR" && mobileBtn("/timetable", "Rendelési idő")}
           {user.role === "DOCTOR" && mobileBtn("/myservices", "Szolgáltatásaim")}
+          <button
+            className="w-full cursor-pointer rounded bg-red-700/80 py-2 font-bold text-white hover:bg-red-700"
+            onClick={handleLogout}
+          >
+            Kijelentkezés
+          </button>
         </div>
       )}
     </header>
