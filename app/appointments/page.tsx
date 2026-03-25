@@ -194,7 +194,7 @@ export default function AppointmentsPage() {
         <div className="mb-6 flex items-center gap-4">
           <label className="font-semibold text-white">Szűrés státusz szerint:</label>
           <select
-            className="input w-64 border-[#BF944A] bg-[#36483D] text-white"
+            className="input w-64 cursor-pointer border-[#BF944A] bg-[#36483D] text-white"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as Appointment["status"] | "")}
           >
