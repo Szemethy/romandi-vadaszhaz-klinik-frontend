@@ -256,33 +256,35 @@ export default function DashboardPage() {
 
         {/* --- Dashboard --- */}
 
-        {/* Következő vizit */}
-        <section className="rounded-xl bg-[#6B4A2D] p-6 shadow-lg">
-          <h2 className="mb-4 text-xl font-bold text-[#BF944A]">Következő vizit</h2>
-          {nextAppointment ? (
-            <div className="rounded-lg bg-[#36483D]/70 p-4 text-white">
-              <p className="text-lg font-semibold">
-                {formatDate(nextAppointment.date)} {formatTime(nextAppointment.date)}
-              </p>
-              <p>
-                Orvos: {nextAppointment.doctorName} ({nextAppointment.specialization})
-              </p>
-              <p className="mt-2 text-sm text-[#A2A369]">
-                {daysUntil(nextAppointment.date)} nap van hátra
-              </p>
-            </div>
-          ) : (
-            <div className="text-white">
-              <p>Nincs jelenleg ütemezett vizit.</p>
-              <button
-                className="mt-2 rounded bg-[#A2A369] px-4 py-2 font-semibold text-[#36483D]"
-                onClick={() => router.push("/appointments/new")}
-              >
-                Időpontfoglalás
-              </button>
-            </div>
-          )}
-        </section>
+        {/* Következő vizit – csak páciensnek */}
+        {user.role === "PATIENT" && (
+          <section className="rounded-xl bg-[#6B4A2D] p-6 shadow-lg">
+            <h2 className="mb-4 text-xl font-bold text-[#BF944A]">Következő vizit</h2>
+            {nextAppointment ? (
+              <div className="rounded-lg bg-[#36483D]/70 p-4 text-white">
+                <p className="text-lg font-semibold">
+                  {formatDate(nextAppointment.date)} {formatTime(nextAppointment.date)}
+                </p>
+                <p>
+                  Orvos: {nextAppointment.doctorName} ({nextAppointment.specialization})
+                </p>
+                <p className="mt-2 text-sm text-[#A2A369]">
+                  {daysUntil(nextAppointment.date)} nap van hátra
+                </p>
+              </div>
+            ) : (
+              <div className="text-white">
+                <p>Nincs jelenleg ütemezett vizit.</p>
+                <button
+                  className="mt-2 rounded bg-[#A2A369] px-4 py-2 font-semibold text-[#36483D]"
+                  onClick={() => router.push("/appointments/new")}
+                >
+                  Időpontfoglalás
+                </button>
+              </div>
+            )}
+          </section>
+        )}
 
         {/* Quick Stats */}
         <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -302,7 +304,7 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        {/* Leletek Timeline */}
+        {/* Leletek Timeline
         <section className="rounded-xl bg-[#6B4A2D] p-6 shadow-lg">
           <h2 className="mb-4 text-xl font-bold text-[#BF944A]">Leletek</h2>
           {noRecords ? (
@@ -337,7 +339,7 @@ export default function DashboardPage() {
               Leletek letöltése
             </button>
           )}
-        </section>
+        </section> */}
       </main>
     </div>
   );
