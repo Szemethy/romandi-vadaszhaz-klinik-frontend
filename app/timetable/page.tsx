@@ -17,7 +17,6 @@ export default function TimetablePage() {
   const [endTime, setEndTime] = useState("12:00");
   const [slotDuration, setSlotDuration] = useState(30);
   const [loading, setLoading] = useState(false);
-  const [loadingPage, setLoadingPage] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [availabilities, setAvailabilities] = useState<any[]>([]);
@@ -29,30 +28,23 @@ export default function TimetablePage() {
     }
   }, [user, router]);
 
-  // ✅ JAVÍTOTT ENDPOINT
-  useEffect(() => {
+  const fetchAvailabilities = async () => {
     if (!token) return;
+    try {
+      const res = await fetch(
+        "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/availability/my",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      const data = await res.json();
+      setAvailabilities(Array.isArray(data) ? data : data.data || []);
+    } catch (err: any) {
+      console.error(err);
+    }
+  };
 
-    const fetchAvailabilities = async () => {
-      try {
-        const res = await fetch(
-          "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/availability/my",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
-
-        setAvailabilities(data.data || data);
-      } catch (err: any) {
-        console.error(err);
-      }
-    };
-
+  useEffect(() => {
     fetchAvailabilities();
   }, [token]);
 
@@ -65,14 +57,6 @@ export default function TimetablePage() {
     try {
       setLoading(true);
       setErrorMessage(null);
-
-      console.log("Sending availability:", {
-        doctor: user.id,
-        dayOfWeek,
-        startTime,
-        endTime,
-        slotDuration,
-      });
 
       const res = await fetch(
         "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/availability",
@@ -93,8 +77,6 @@ export default function TimetablePage() {
       );
 
       const data = await res.json();
-      console.log("Response:", res.status, data);
-
       if (!res.ok) {
         const msg =
           data.message || (data.errors ? Object.values(data.errors).join(", ") : "Ismeretlen hiba");
@@ -102,8 +84,8 @@ export default function TimetablePage() {
         return;
       }
 
-      setErrorMessage(null);
       toast.success("Rendelési idő sikeresen mentve!");
+      fetchAvailabilities(); // frissítés
     } catch (err: any) {
       console.error(err);
       setErrorMessage(err.message || "Mentési hiba");
@@ -112,11 +94,44 @@ export default function TimetablePage() {
     }
   };
 
+  const handleEdit = (item: any) => {
+    setDayOfWeek(item.dayOfWeek);
+    setStartTime(item.startTime.slice(0, 5));
+    setEndTime(item.endTime.slice(0, 5));
+    setSlotDuration(item.slotDuration || 30);
+
+    window.scrollTo({ top: 0, behavior: "smooth" }); // legfelső részre ugrás
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!token) return;
+    if (!confirm("Biztosan törli a rendelési időt?")) return;
+
+    try {
+      const res = await fetch(
+        `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/availability/${id}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      if (!res.ok) throw new Error("Törlés sikertelen");
+
+      toast.success("Rendelési idő törölve");
+      fetchAvailabilities(); // lista frissítés
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Törlés hiba");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#36483D] text-[#A89D62]">
       <Header />
 
       <main className="flex flex-col items-center p-8">
+        {/* FORM */}
         <div className="w-full max-w-md rounded-xl bg-[#6B4A2D] p-6 shadow-lg">
           <h1 className="mb-6 text-center text-2xl font-bold text-[#BF944A]">
             Rendelési idő beállítása
@@ -181,6 +196,23 @@ export default function TimetablePage() {
                   <p>
                     {item.startTime.slice(0, 5)} - {item.endTime.slice(0, 5)}
                   </p>
+                </div>
+
+                <div className="flex gap-3 text-xl">
+                  <button
+                    className="cursor-pointer transition-transform duration-200 hover:scale-125 hover:text-yellow-300"
+                    title="Módosítás"
+                    onClick={() => handleEdit(item)}
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    className="cursor-pointer transition-transform duration-200 hover:scale-125 hover:text-red-500"
+                    title="Törlés"
+                    onClick={() => handleDelete(item._id)}
+                  >
+                    🗑️
+                  </button>
                 </div>
               </div>
             ))}
