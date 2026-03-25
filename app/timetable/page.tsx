@@ -19,7 +19,15 @@ export default function TimetablePage() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const [availabilities, setAvailabilities] = useState<any[]>([]);
+  const [availabilities, setAvailabilities] = useState<Availability[]>([]);
+
+  type Availability = {
+    _id: string;
+    dayOfWeek: string;
+    startTime: string;
+    endTime: string;
+    slotDuration?: number;
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -39,8 +47,12 @@ export default function TimetablePage() {
       );
       const data = await res.json();
       setAvailabilities(Array.isArray(data) ? data : data.data || []);
-    } catch (err: any) {
-      console.error(err);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        toast.error(err.message);
+      } else {
+        toast.error("Ismeretlen hiba történt");
+      }
     }
   };
 
@@ -86,15 +98,19 @@ export default function TimetablePage() {
 
       toast.success("Rendelési idő sikeresen mentve!");
       fetchAvailabilities(); // frissítés
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setErrorMessage(err.message || "Mentési hiba");
+      if (err instanceof Error) {
+        setErrorMessage(err.message);
+      } else {
+        setErrorMessage("Mentési hiba");
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEdit = (item: any) => {
+  const handleEdit = (item: Availability) => {
     setDayOfWeek(item.dayOfWeek);
     setStartTime(item.startTime.slice(0, 5));
     setEndTime(item.endTime.slice(0, 5));
@@ -120,9 +136,13 @@ export default function TimetablePage() {
 
       toast.success("Rendelési idő törölve");
       fetchAvailabilities(); // lista frissítés
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      toast.error(err.message || "Törlés hiba");
+      if (err instanceof Error) {
+        toast.error(err.message);
+      } else {
+        toast.error("Törlés hiba");
+      }
     }
   };
 

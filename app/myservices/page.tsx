@@ -129,8 +129,12 @@ export default function MyServicesPage() {
       setEditingServiceId(null);
 
       fetchServices();
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        toast.error(err.message);
+      } else {
+        toast.error("Ismeretlen hiba történt");
+      }
     } finally {
       setLoading(false);
     }
@@ -155,8 +159,12 @@ export default function MyServicesPage() {
 
       toast.success("Szolgáltatás törölve");
       setServices((prev) => prev.filter((s) => s._id !== serviceId));
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        toast.error(err.message);
+      } else {
+        toast.error("Ismeretlen hiba történt");
+      }
     }
   };
 

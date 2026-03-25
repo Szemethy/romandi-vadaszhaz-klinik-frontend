@@ -175,16 +175,16 @@ export default function AppointmentsPage() {
     }
   }
 
-  if (loading)
-    return (
-      <div className="min-h-screen bg-[#36483D] text-[#A89D62]">
-        <Header />
-        <main className="mx-auto max-w-6xl p-8">
-          <h1 className="mb-8 text-3xl font-bold text-[#BF944A]">Időpontok</h1>
-          <p>Betöltés...</p>
-        </main>
-      </div>
-    );
+  // if (loading)
+  //   return (
+  //     <div className="min-h-screen bg-[#36483D] text-[#A89D62]">
+  //       <Header />
+  //       <main className="mx-auto max-w-6xl p-8">
+  //         <h1 className="mb-8 text-3xl font-bold text-[#BF944A]">Időpontok</h1>
+  //         <p>Betöltés...</p>
+  //       </main>
+  //     </div>
+  //   );
 
   return (
     <div className="min-h-screen bg-[#36483D] text-[#A89D62]">
@@ -209,74 +209,73 @@ export default function AppointmentsPage() {
           </select>
         </div>
 
-        {filteredAppointments.length === 0 ? (
+        {/* {filteredAppointments.length === 0 ? (
           <p className="font-semibold text-white">Nincsenek időpontok.</p>
-        ) : (
-          <div className="space-y-6">
-            {paginatedAppointments.map((app) => {
-              const now = dayjs();
-              const isPast = dayjs(app.startTime).isBefore(now);
+        ) : ( */}
+        <div className="space-y-6">
+          {paginatedAppointments.map((app) => {
+            const now = dayjs();
+            const isPast = dayjs(app.startTime).isBefore(now);
 
-              const isUnavailable =
-                app.status === "REJECTED" ||
-                app.status === "CANCELLED" ||
-                (app.status === "PENDING" && isPast);
+            const isUnavailable =
+              app.status === "REJECTED" ||
+              app.status === "CANCELLED" ||
+              (app.status === "PENDING" && isPast);
 
-              return (
-                <div
-                  className={`rounded-xl border border-[#BF944A]/20 p-6 shadow-lg transition ${
-                    isUnavailable ? "bg-gray-600/40" : "bg-[#6B4A2D]"
-                  }`}
-                  key={app._id}
+            return (
+              <div
+                className={`rounded-xl border border-[#BF944A]/20 p-6 shadow-lg transition ${
+                  isUnavailable ? "bg-gray-600/40" : "bg-[#6B4A2D]"
+                }`}
+                key={app._id}
+              >
+                {isUnavailable && (
+                  <div className="mb-2 inline-block rounded bg-gray-500 px-3 py-1 text-xs font-bold text-white">
+                    Nem elérhető
+                  </div>
+                )}
+
+                <h2
+                  className={`mb-2 text-xl font-bold text-yellow-400 ${isUnavailable ? "line-through" : ""}`}
                 >
-                  {isUnavailable && (
-                    <div className="mb-2 inline-block rounded bg-gray-500 px-3 py-1 text-xs font-bold text-white">
-                      Nem elérhető
-                    </div>
+                  {app.service_id.topic}
+                </h2>
+
+                <div
+                  className={`space-y-1 text-sm text-white ${isUnavailable ? "line-through" : ""}`}
+                >
+                  <p>📍 {app.service_id.location}</p>
+                  <p>🕒 {dayjs(app.startTime).format("YYYY.MM.DD HH:mm")}</p>
+                  <p>👨‍⚕️ Orvos: {app.doctor_id.name}</p>
+                  <p>👤 Páciens: {app.patient_id.name}</p>
+                  <p>💰 {app.service_id.price}</p>
+
+                  {/* ✅ Új: referral forrás megjelenítése */}
+                  {app.referral_type === "SELF" && <p>📌 Forrás: Saját beutalás</p>}
+                  {app.referral_type === "DOCTOR" && app.referred_by && (
+                    <p>📌 Beutaló orvos: {app.referred_by.name}</p>
                   )}
 
-                  <h2
-                    className={`mb-2 text-xl font-bold text-yellow-400 ${isUnavailable ? "line-through" : ""}`}
+                  <p
+                    className={`font-bold ${
+                      app.status === "PENDING"
+                        ? "text-yellow-400"
+                        : app.status === "ACCEPTED"
+                          ? "text-green-400"
+                          : app.status === "PROPOSED"
+                            ? "text-orange-400"
+                            : app.status === "COMPLETED"
+                              ? "text-blue-400"
+                              : "text-gray-400"
+                    }`}
                   >
-                    {app.service_id.topic}
-                  </h2>
-
-                  <div
-                    className={`space-y-1 text-sm text-white ${isUnavailable ? "line-through" : ""}`}
-                  >
-                    <p>📍 {app.service_id.location}</p>
-                    <p>🕒 {dayjs(app.startTime).format("YYYY.MM.DD HH:mm")}</p>
-                    <p>👨‍⚕️ Orvos: {app.doctor_id.name}</p>
-                    <p>👤 Páciens: {app.patient_id.name}</p>
-                    <p>💰 {app.service_id.price}</p>
-
-                    {/* ✅ Új: referral forrás megjelenítése */}
-                    {app.referral_type === "SELF" && <p>📌 Forrás: Saját beutalás</p>}
-                    {app.referral_type === "DOCTOR" && app.referred_by && (
-                      <p>📌 Beutaló orvos: {app.referred_by.name}</p>
-                    )}
-
-                    <p
-                      className={`font-bold ${
-                        app.status === "PENDING"
-                          ? "text-yellow-400"
-                          : app.status === "ACCEPTED"
-                            ? "text-green-400"
-                            : app.status === "PROPOSED"
-                              ? "text-orange-400"
-                              : app.status === "COMPLETED"
-                                ? "text-blue-400"
-                                : "text-gray-400"
-                      }`}
-                    >
-                      Állapot: {statusLabels[app.status]}
-                    </p>
-                  </div>
+                    Állapot: {statusLabels[app.status]}
+                  </p>
                 </div>
-              );
-            })}
-          </div>
-        )}
+              </div>
+            );
+          })}
+        </div>
 
         <div className="mt-6 flex items-center justify-center gap-4" id="pagination-buttons">
           <button
