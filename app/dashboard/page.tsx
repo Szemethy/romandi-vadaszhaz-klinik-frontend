@@ -1,6 +1,7 @@
 "use client";
 
 import dayjs from "dayjs";
+import App from "next/app";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -21,14 +22,45 @@ export default function DashboardPage() {
   const [birthDate, setBirthDate] = useState("");
 
   // --- DASHBOARD ADATOK ---
-  const [nextAppointment, setNextAppointment] = useState<any>(null);
-  const [appointments, setAppointments] = useState<any[]>([]);
-  const [records, setRecords] = useState<any[]>([]);
-  const [stats, setStats] = useState<any>({
+  const [nextAppointment, setNextAppointment] = useState<NextAppointment | null>(null);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [records, setRecords] = useState<RecordItem[]>([]);
+  const [stats, setStats] = useState<Stats>({
     totalVisits: 0,
     activeAppointments: 0,
     lastVisitDate: null,
   });
+
+  type NextAppointment = {
+    date: string;
+    doctorName: string;
+    specialization: string;
+  };
+
+  type Appointment = {
+    _id: string;
+    date: string;
+  };
+
+  type RecordItem = {
+    _id: string;
+    date: string;
+    doctorName: string;
+    serviceType: string;
+  };
+
+  type Stats = {
+    totalVisits: number;
+    activeAppointments: number;
+    lastVisitDate: string | null;
+  };
+
+  type UpdateProfileBody = {
+    phone: string;
+    address: string;
+    birthDate: string;
+    password?: string;
+  };
 
   useEffect(() => {
     setIsMounted(true);
@@ -56,9 +88,13 @@ export default function DashboardPage() {
         setAppointments(data.appointments || []);
         setRecords(data.records || []);
         setStats(data.stats || {});
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
-        toast.error(err.message || "Hiba a dashboard betöltésekor");
+        if (err instanceof Error) {
+          toast.error(err.message);
+        } else {
+          toast.error("Hiba a dashboard betöltésekor");
+        }
       }
     };
 
@@ -104,7 +140,8 @@ export default function DashboardPage() {
   const handleSave = async () => {
     try {
       setBirthDateError(null);
-      const bodyData: any = { phone, address, birthDate };
+      const bodyData: UpdateProfileBody = { phone, address, birthDate };
+      if (password.trim() !== "") bodyData.password = password;
       if (password.trim() !== "") bodyData.password = password;
 
       const res = await fetch(

@@ -146,9 +146,14 @@ export default function DoctorServicesPage() {
       setSelectedDate(null);
       setSelectedHour("");
       setSelectedMinute("");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("🔥 FRONTEND ERROR:", err);
-      setError(err.message || "Hiba történt a foglalás során");
+
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Hiba történt a foglalás során");
+      }
     }
   };
 
