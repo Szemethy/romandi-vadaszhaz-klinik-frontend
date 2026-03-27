@@ -30,8 +30,6 @@ export default function AppointmentsPage() {
   const [selectedHour, setSelectedHour] = useState("");
   const [selectedMinute, setSelectedMinute] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-
-  // ✅ Új state a státusz szűréshez
   const [statusFilter, setStatusFilter] = useState<Appointment["status"] | "">("");
 
   const statusLabels: Record<Appointment["status"], string> = {
@@ -76,32 +74,32 @@ export default function AppointmentsPage() {
     }
     if (token) fetchAppointments();
   }, [token]);
+  
 
-  // ✅ Filter: szerepkör + státusz
   const filteredAppointments = appointments.filter((app) => {
-    if (!user) return false;
+  if (!user) return false;
 
-    if (user.role === "PATIENT" && app.patient_id._id !== user.id) return false;
-    if (user.role === "DOCTOR" && app.doctor_id._id !== user.id) return false;
+ 
+  if (user.role === "PATIENT" && app.patient_id._id !== user.id) return false;
+  if (user.role === "DOCTOR" && app.doctor_id._id !== user.id) return false;
 
-    // státusz szűrés
-    if (statusFilter && app.status !== statusFilter) return false;
+  if (statusFilter && app.status !== statusFilter) return false;
 
-    return true;
-  });
-
+  return true;
+});
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedAppointments = filteredAppointments.slice(startIndex, startIndex + itemsPerPage);
 
   const totalPages = Math.max(1, Math.ceil(filteredAppointments.length / itemsPerPage));
 
+  
   useEffect(() => {
     if (currentPage > totalPages) {
       setCurrentPage(totalPages);
     }
   }, [filteredAppointments.length, totalPages]);
 
-  async function updateStatus(id: string, status: Appointment["status"]) {
+  async function updateStatus(id: string, status: string) {
     try {
       const res = await fetch(
         `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/appointments/${id}`,
@@ -115,7 +113,9 @@ export default function AppointmentsPage() {
         },
       );
       if (!res.ok) throw new Error("Státusz frissítés sikertelen");
-      setAppointments((prev) => prev.map((a) => (a._id === id ? { ...a, status } : a)));
+      setAppointments((prev) =>
+        prev.map((a) => (a._id === id ? { ...a, status: status as any } : a)),
+      );
     } catch (error) {
       console.error(error);
     }
@@ -190,7 +190,6 @@ export default function AppointmentsPage() {
       <main className="mx-auto max-w-5xl p-8">
         <h1 className="mb-8 text-3xl font-bold text-[#BF944A]">Időpontok</h1>
 
-        {/* ✅ Státusz szűrő a lista tetején */}
         <div className="mb-6 flex items-center gap-4">
           <label className="font-semibold text-white">Szűrés státusz szerint:</label>
           <select
@@ -206,74 +205,173 @@ export default function AppointmentsPage() {
             ))}
           </select>
         </div>
+      
+          <div className="space-y-6">
+            {paginatedAppointments.map((app) => {
+              const now = dayjs();
+              const isPast = dayjs(app.startTime).isBefore(now);
 
-        {/* {filteredAppointments.length === 0 ? (
-          <p className="font-semibold text-white">Nincsenek időpontok.</p>
-        ) : ( */}
-        <div className="space-y-6">
-          {paginatedAppointments.map((app) => {
-            const now = dayjs();
-            const isPast = dayjs(app.startTime).isBefore(now);
+              const isUnavailable =
+                app.status === "REJECTED" ||
+                app.status === "CANCELLED" ||
+                (app.status === "PENDING" && isPast);
 
-            const isUnavailable =
-              app.status === "REJECTED" ||
-              app.status === "CANCELLED" ||
-              (app.status === "PENDING" && isPast);
-
-            return (
-              <div
-                className={`rounded-xl border border-[#BF944A]/20 p-6 shadow-lg transition ${
-                  isUnavailable ? "bg-gray-600/40" : "bg-[#6B4A2D]"
-                }`}
-                key={app._id}
-              >
-                {isUnavailable && (
-                  <div className="mb-2 inline-block rounded bg-gray-500 px-3 py-1 text-xs font-bold text-white">
-                    Nem elérhető
-                  </div>
-                )}
-
-                <h2
-                  className={`mb-2 text-xl font-bold text-yellow-400 ${isUnavailable ? "line-through" : ""}`}
-                >
-                  {app.service_id.topic}
-                </h2>
-
+              return (
                 <div
-                  className={`space-y-1 text-sm text-white ${isUnavailable ? "line-through" : ""}`}
+                  className={`rounded-xl border border-[#BF944A]/20 p-6 shadow-lg transition ${
+                    isUnavailable ? "bg-gray-600/40" : "bg-[#6B4A2D]"
+                  }`}
+                  key={app._id}
                 >
-                  <p>📍 {app.service_id.location}</p>
-                  <p>🕒 {dayjs(app.startTime).format("YYYY.MM.DD HH:mm")}</p>
-                  <p>👨‍⚕️ Orvos: {app.doctor_id.name}</p>
-                  <p>👤 Páciens: {app.patient_id.name}</p>
-                  <p>💰 {app.service_id.price}</p>
-
-                  {/* ✅ Új: referral forrás megjelenítése */}
-                  {app.referral_type === "SELF" && <p>📌 Forrás: Saját beutalás</p>}
-                  {app.referral_type === "DOCTOR" && app.referred_by && (
-                    <p>📌 Beutaló orvos: {app.referred_by.name}</p>
+                  {isUnavailable && (
+                    <div className="mb-2 inline-block rounded bg-gray-500 px-3 py-1 text-xs font-bold text-white">
+                      Nem elérhető
+                    </div>
                   )}
 
-                  <p
-                    className={`font-bold ${
-                      app.status === "PENDING"
-                        ? "text-yellow-400"
-                        : app.status === "ACCEPTED"
-                          ? "text-green-400"
-                          : app.status === "PROPOSED"
-                            ? "text-orange-400"
-                            : app.status === "COMPLETED"
-                              ? "text-blue-400"
-                              : "text-gray-400"
-                    }`}
+                  <h2
+                    className={`mb-2 text-xl font-bold text-yellow-400 ${isUnavailable ? "line-through" : ""}`}
                   >
-                    Állapot: {statusLabels[app.status]}
-                  </p>
+                    {app.service_id.topic}
+                  </h2>
+
+                  <div
+                    className={`space-y-1 text-sm text-white ${isUnavailable ? "line-through" : ""}`}
+                  >
+                    <p>📍 {app.service_id.location}</p>
+                    <p>🕒 {dayjs(app.startTime).format("YYYY.MM.DD HH:mm")}</p>
+                    <p>👨‍⚕️ Orvos: {app.doctor_id.name}</p>
+                    <p>👤 Páciens: {app.patient_id.name}</p>
+                    <p>💰 {app.service_id.price}</p>
+                    {app.referral_type === "SELF" && <p>📌 Forrás: Saját beutalás</p>}
+                    {app.referral_type === "DOCTOR" && app.referred_by && (
+                      <p>📌 Beutaló orvos: {app.referred_by.name}</p>
+                    )}
+
+                    
+                    <p
+                      className={`font-bold ${
+                        app.status === "PENDING"
+                          ? "text-yellow-400"
+                          : app.status === "ACCEPTED"
+                            ? "text-green-400"
+                            : app.status === "PROPOSED"
+                              ? "text-orange-400"
+                              : app.status === "COMPLETED"
+                                ? "text-blue-400"
+                                : "text-gray-400"
+                      }`}
+                    >
+                      Állapot: {statusLabels[app.status]}
+                    </p>
+                  </div>
+
+                  {user?.role === "DOCTOR" && !isUnavailable && (
+                    <div className="mt-4 flex flex-col gap-3">
+                      {app.status === "PENDING" && !isPast && (
+                        <>
+                          <button
+                            className="cursor-pointer rounded bg-[#A2A369] px-4 py-2 font-bold text-[#36483D] hover:bg-[#BF944A]"
+                            onClick={() => updateStatus(app._id, "ACCEPTED")}
+                          >
+                            Elfogad
+                          </button>
+                          <button
+                            className="cursor-pointer rounded bg-[#A2A369] px-4 py-2 font-bold text-[#36483D] hover:bg-[#BF944A]"
+                            onClick={() => updateStatus(app._id, "REJECTED")}
+                          >
+                            Elutasít
+                          </button>
+                          <button
+                            className="cursor-pointer rounded bg-[#A2A369] px-4 py-2 font-bold text-[#36483D] hover:bg-[#BF944A]"
+                            onClick={() =>
+                              setOpenModifyId(openModifyId === app._id ? null : app._id)
+                            }
+                          >
+                            Időpont módosítás
+                          </button>
+                        </>
+                      )}
+
+                      {app.status === "ACCEPTED" && isPast && (
+                        <button
+                          className="btn w-full cursor-pointer rounded bg-[#A2A369] py-2 font-bold text-[#36483D] shadow-md hover:bg-[#BF944A]"
+                          onClick={() => router.push(`/newinfo/${app._id}`)}
+                        >
+                          Lelet készítése
+                        </button>
+                      )}
+
+                      {app.status === "COMPLETED" && (
+                        <div className="rounded border border-green-400 py-2 text-center font-bold text-green-400">
+                          ✓ Vizit befejezve (Lelet kész)
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {user?.role === "PATIENT" && !isUnavailable && !isPast && (
+                    <div className="mt-4 flex gap-3">
+                      <button
+                        className="cursor-pointer rounded bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+                        onClick={() => {
+                          if (confirm("Biztosan lemondod?")) updateStatus(app._id, "CANCELLED");
+                        }}
+                      >
+                        Lemondás
+                      </button>
+                    </div>
+                  )}
+
+                  {openModifyId === app._id && (
+                    <div className="mt-4 space-y-3 rounded-lg bg-black/20 p-4">
+                      <DatePicker
+                        className="input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white"
+                        dateFormat="yyyy.MM.dd"
+                        minDate={new Date()}
+                        placeholderText="Dátum kiválasztása"
+                        selected={selectedDate}
+                        onChange={(date: Date | null) => setSelectedDate(date)}
+                      />
+                      <div className="flex gap-2">
+                        <select
+                          className="input w-full border-[#BF944A] bg-[#36483D] text-white"
+                          value={selectedHour}
+                          onChange={(e) => setSelectedHour(e.target.value)}
+                        >
+                          <option value="">Óra</option>
+                          {activeHours.map((h) => (
+                            <option key={h} value={h}>
+                              {h}
+                            </option>
+                          ))}
+                        </select>
+                        <select
+                          className="input w-full border-[#BF944A] bg-[#36483D] text-white"
+                          value={selectedMinute}
+                          onChange={(e) => setSelectedMinute(e.target.value)}
+                        >
+                          <option value="">Perc</option>
+                          {minutes.map((m) => (
+                            <option key={m} value={m}>
+                              {m.toString().padStart(2, "0")}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <button
+                        className="w-full rounded bg-green-600 py-2 font-bold text-white"
+                        onClick={() => modifyAppointmentDate(app._id)}
+                      >
+                        Módosítás mentése
+                      </button>
+                    </div>
+                  )}
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+   
 
         <div className="mt-6 flex items-center justify-center gap-4" id="pagination-buttons">
           <button
