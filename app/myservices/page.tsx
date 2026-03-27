@@ -260,14 +260,14 @@ export default function MyServicesPage() {
 
                 <div className="mt-4 flex gap-2">
                   <button
-                    className="flex-1 rounded bg-yellow-500 py-2 font-bold text-white"
+                    className="cursor-pointer flex-1 rounded bg-yellow-500 py-2 font-bold text-white"
                     onClick={() => handleEditService(service)}
                   >
                     Módosítás
                   </button>
 
                   <button
-                    className="flex-1 rounded bg-red-600 py-2 font-bold text-white"
+                    className="cursor-pointer flex-1 rounded bg-red-600 py-2 font-bold text-white"
                     onClick={() => deleteService(service._id)}
                   >
                     Törlés
