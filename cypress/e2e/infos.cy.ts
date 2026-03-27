@@ -1,7 +1,7 @@
 // cypress/e2e/infos_page.cy.js
 describe("Orvosi leletek oldal", () => {
   beforeEach(() => {
-    cy.visit("http://localhost:8080/infos"); // a te útvonalad lehet, hogy más
+    cy.visit("http://localhost:8080/infos"); 
   });
 
   it("Oldal betöltése", () => {

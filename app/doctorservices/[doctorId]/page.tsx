@@ -63,7 +63,7 @@ export default function DoctorServicesPage() {
     if (doctorId) fetchServices();
   }, [doctorId]);
 
-  if (!user || user.role !== "PATIENT") return null;
+  if (!user || user.role !== "PATIENT") return null; //tesztnél ez majd komemtnelni kell
 
   // 🩺 MOCK rendelési napok (1=Hétfő ... 5=Péntek)
   const workingDays = [1, 2, 3, 4, 5];
