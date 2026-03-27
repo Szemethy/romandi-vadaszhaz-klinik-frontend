@@ -24,12 +24,20 @@ type Service = {
   price: string;
 };
 
+type Availability = {
+  _id: string;
+  dayOfWeek: string;
+  startTime: string;
+  endTime: string;
+};
+
 export default function DoctorServicesPage() {
   const { doctorId } = useParams();
   const router = useRouter();
   const { user, token } = useGlobalStore();
 
   const [services, setServices] = useState<Service[]>([]);
+  const [availabilities, setAvailabilities] = useState<Availability[]>([]);
   const [loading, setLoading] = useState(true);
   const [openBookingId, setOpenBookingId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -63,18 +71,30 @@ export default function DoctorServicesPage() {
     if (doctorId) fetchServices();
   }, [doctorId]);
 
-  if (!user || user.role !== "PATIENT") return null; //tesztnél ez majd komemtnelni kell
+  // ✅ ÚJ: rendelési idők lekérése
+  useEffect(() => {
+    const fetchAvailabilities = async () => {
+      try {
+        const res = await fetch(
+          `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/availability/${doctorId}`
+        );
+        const data = await res.json();
+        setAvailabilities(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Availability hiba:", err);
+        setAvailabilities([]);
+      }
+    };
 
-  // 🩺 MOCK rendelési napok (1=Hétfő ... 5=Péntek)
+    if (doctorId) fetchAvailabilities();
+  }, [doctorId]);
+
+  if (!user || user.role !== "PATIENT") return null;
+
   const workingDays = [1, 2, 3, 4, 5];
-
-  // 🕒 MOCK aktív órák (8-16)
   const activeHours = Array.from({ length: 9 }, (_, i) => 8 + i);
-
-  // ⏱ percek 10-esével
   const minutes = [0, 10, 20, 30, 40, 50];
 
-  // ✅ BOOKING API HÍVÁS
   const handleBooking = async (serviceId: string) => {
     setError("");
 
@@ -95,13 +115,12 @@ export default function DoctorServicesPage() {
     }
 
     try {
-      // explicit Budapest időzóna, helyi idő megtartásával
       const startDateTime = dayjs(selectedDate)
         .hour(Number(selectedHour))
         .minute(Number(selectedMinute))
         .second(0)
         .tz("Europe/Budapest", true)
-        .format(); // ISO 8601 +01:00 offset
+        .format();
 
       const endDateTime = dayjs(startDateTime).add(30, "minute").format();
 
@@ -112,9 +131,6 @@ export default function DoctorServicesPage() {
         endTime: endDateTime,
         referral_type: "SELF",
       };
-
-      console.log("📤 KÜLDÖTT TOKEN:", token);
-      console.log("📤 KÜLDÖTT BODY:", requestBody);
 
       const res = await fetch(
         "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/appointments/",
@@ -163,10 +179,34 @@ export default function DoctorServicesPage() {
       <main className="mx-auto max-w-5xl p-8">
         <h1 className="mb-8 text-3xl font-bold text-[#BF944A]">Szolgáltatások</h1>
 
+        {/* ✅ ÚJ: rendelési idő megjelenítés */}
+        <div className="mb-8 rounded-xl bg-[#6B4A2D] p-6 shadow-lg">
+          <h2 className="mb-4 text-xl font-bold text-[#BF944A]">
+            Rendelési idő
+          </h2>
+
+          {availabilities.length === 0 ? (
+            <p className="text-white">Nincs megadott rendelési idő</p>
+          ) : (
+            <div className="space-y-2 text-white">
+              {availabilities.map((a) => (
+                <div key={a._id} className="flex justify-between">
+                  <span>{a.dayOfWeek}</span>
+                  <span>
+                    {a.startTime.slice(0, 5)} - {a.endTime.slice(0, 5)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {loading ? (
           <p>Betöltés...</p>
         ) : services.length === 0 ? (
-          <p className="font-semibold text-white">Az orvosnak jelenleg nincsenek szolgáltatásai!</p>
+          <p className="font-semibold text-white">
+            Az orvosnak jelenleg nincsenek szolgáltatásai!
+          </p>
         ) : (
           <div className="grid gap-6 md:grid-cols-2">
             {services.map((service) => (
@@ -174,7 +214,9 @@ export default function DoctorServicesPage() {
                 className="rounded-xl border border-[#BF944A]/20 bg-[#6B4A2D] p-6 shadow-lg"
                 key={service._id}
               >
-                <h2 className="mb-2 text-xl font-bold text-[#BF944A]">{service.topic}</h2>
+                <h2 className="mb-2 text-xl font-bold text-[#BF944A]">
+                  {service.topic}
+                </h2>
                 <p className="mb-3 text-white">{service.description}</p>
 
                 <div className="mb-4 space-y-1 text-sm">
@@ -185,7 +227,9 @@ export default function DoctorServicesPage() {
                 <button
                   className="w-full cursor-pointer rounded bg-[#A2A369] py-2 font-bold text-[#36483D] hover:bg-[#BF944A]"
                   onClick={() =>
-                    setOpenBookingId(openBookingId === service._id ? null : service._id)
+                    setOpenBookingId(
+                      openBookingId === service._id ? null : service._id,
+                    )
                   }
                 >
                   Időpont foglalás
@@ -200,13 +244,17 @@ export default function DoctorServicesPage() {
                       minDate={new Date()}
                       placeholderText="Dátum kiválasztása"
                       selected={selectedDate}
-                      onChange={(date: Date | null) => setSelectedDate(date)}
+                      onChange={(date: Date | null) =>
+                        setSelectedDate(date)
+                      }
                     />
 
                     <select
                       className="input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:outline-none"
                       value={selectedHour}
-                      onChange={(e) => setSelectedHour(e.target.value)}
+                      onChange={(e) =>
+                        setSelectedHour(e.target.value)
+                      }
                     >
                       <option value="">Óra kiválasztása</option>
                       {activeHours.map((hour) => (
@@ -219,7 +267,9 @@ export default function DoctorServicesPage() {
                     <select
                       className="input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:outline-none"
                       value={selectedMinute}
-                      onChange={(e) => setSelectedMinute(e.target.value)}
+                      onChange={(e) =>
+                        setSelectedMinute(e.target.value)
+                      }
                     >
                       <option value="">Perc</option>
                       {minutes.map((min) => (
@@ -229,7 +279,11 @@ export default function DoctorServicesPage() {
                       ))}
                     </select>
 
-                    {error && <p className="font-semibold text-red-400">{error}</p>}
+                    {error && (
+                      <p className="font-semibold text-red-400">
+                        {error}
+                      </p>
+                    )}
 
                     <button
                       className="w-full cursor-pointer rounded bg-green-600 py-2 font-bold text-white hover:bg-green-700"
