@@ -26,15 +26,19 @@ export default function DashboardPage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [records, setRecords] = useState<RecordItem[]>([]);
   const [stats, setStats] = useState<Stats>({
-    totalVisits: 0,
-    activeAppointments: 0,
-    lastVisitDate: null,
+    type: "",
+    totalCompleted: 0,
+    totalActive: 0,
+    healthInvestment: 0,
+    nextAppointment: null,
   });
 
   type NextAppointment = {
     date: string;
-    doctorName: string;
+    doctor: string;
     specialization: string;
+    location: string;
+    topic: string;
   };
 
   type Appointment = {
@@ -50,9 +54,17 @@ export default function DashboardPage() {
   };
 
   type Stats = {
-    totalVisits: number;
-    activeAppointments: number;
-    lastVisitDate: string | null;
+    type: string;
+    totalCompleted: number;
+    totalActive: number;
+    healthInvestment: number;
+    nextAppointment: {
+      date: string;
+      doctor: string;
+      specialization: string;
+      location: string;
+      topic: string;
+    } | null;
   };
 
   type UpdateProfileBody = {
@@ -76,7 +88,7 @@ export default function DashboardPage() {
     const fetchDashboard = async () => {
       try {
         const res = await fetch(
-          "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/users/profile",
+          "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/users/stats/me",
           {
             headers: { Authorization: `Bearer ${token}` },
           },
@@ -84,10 +96,8 @@ export default function DashboardPage() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || "Hiba a dashboard betöltésében");
 
-        setNextAppointment(data.nextAppointment || null);
-        setAppointments(data.appointments || []);
-        setRecords(data.records || []);
         setStats(data.stats || {});
+        setNextAppointment(data.stats?.nextAppointment || null);
       } catch (err: unknown) {
         console.error(err);
         if (err instanceof Error) {
@@ -303,7 +313,7 @@ export default function DashboardPage() {
                   {formatDate(nextAppointment.date)} {formatTime(nextAppointment.date)}
                 </p>
                 <p>
-                  Orvos: {nextAppointment.doctorName} ({nextAppointment.specialization})
+                  Orvos: {nextAppointment.doctor} ({nextAppointment.specialization})
                 </p>
                 <p className="mt-2 text-sm text-[#A2A369]">
                   {daysUntil(nextAppointment.date)} nap van hátra
@@ -326,57 +336,18 @@ export default function DashboardPage() {
         {/* Quick Stats */}
         <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <div className="rounded-xl bg-[#6B4A2D] p-6 text-center shadow-lg">
-            <p className="text-sm opacity-70">Összes orvosi vizit</p>
-            <p className="text-2xl font-bold">{stats.totalVisits || 0}</p>
+            <p className="text-sm opacity-70">Lezárt vizitek</p>
+            <p className="text-2xl font-bold">{stats.totalCompleted || 0}</p>
           </div>
           <div className="rounded-xl bg-[#6B4A2D] p-6 text-center shadow-lg">
             <p className="text-sm opacity-70">Aktív foglalások</p>
-            <p className="text-2xl font-bold">{stats.activeAppointments || 0}</p>
+            <p className="text-2xl font-bold">{stats.totalActive || 0}</p>
           </div>
           <div className="rounded-xl bg-[#6B4A2D] p-6 text-center shadow-lg">
-            <p className="text-sm opacity-70">Utolsó vizsgálat</p>
-            <p className="text-2xl font-bold">
-              {stats.lastVisitDate ? formatDate(stats.lastVisitDate) : "N/A"}
-            </p>
+            <p className="text-sm opacity-70">Egészségügyi ráfordítás</p>
+            <p className="text-2xl font-bold">{stats.healthInvestment || 0} Ft</p>
           </div>
         </section>
-
-        {/* Leletek Timeline
-        <section className="rounded-xl bg-[#6B4A2D] p-6 shadow-lg">
-          <h2 className="mb-4 text-xl font-bold text-[#BF944A]">Leletek</h2>
-          {noRecords ? (
-            <p>Nincs még lelet rögzítve.</p>
-          ) : (
-            <ul className="space-y-3">
-              {records
-                .sort((a, b) => dayjs(b.date).diff(dayjs(a.date)))
-                .map((r) => (
-                  <li className="flex justify-between rounded-lg bg-[#36483D]/70 p-3" key={r._id}>
-                    <div>
-                      <p className="font-semibold">
-                        {formatDate(r.date)} - {r.doctorName}
-                      </p>
-                      <p>{r.serviceType}</p>
-                    </div>
-                    <button
-                      className="rounded bg-[#A2A369] px-3 py-1 font-semibold text-[#36483D]"
-                      onClick={() => router.push(`/records/${r._id}`)}
-                    >
-                      Részletek
-                    </button>
-                  </li>
-                ))}
-            </ul>
-          )}
-          {records.length > 0 && (
-            <button
-              className="mt-4 rounded bg-[#BF944A] px-4 py-2 font-semibold text-[#36483D]"
-              onClick={handleDownloadRecords}
-            >
-              Leletek letöltése
-            </button>
-          )}
-        </section> */}
       </main>
     </div>
   );
