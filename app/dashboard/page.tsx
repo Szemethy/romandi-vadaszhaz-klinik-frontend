@@ -313,8 +313,8 @@ export default function DashboardPage() {
               <div className="text-white">
                 <p>Nincs jelenleg ütemezett vizit.</p>
                 <button
-                  className="mt-2 rounded bg-[#A2A369] px-4 py-2 font-semibold text-[#36483D]"
-                  onClick={() => router.push("/appointments/new")}
+                  className="mt-2 cursor-pointer rounded bg-[#A2A369] px-4 py-2 font-semibold text-[#36483D]"
+                  onClick={() => router.push("/doctors")}
                 >
                   Időpontfoglalás
                 </button>
