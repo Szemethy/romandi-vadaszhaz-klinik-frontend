@@ -131,7 +131,7 @@ export default function TimetablePage() {
 
   const handleDelete = async (id: string) => {
     if (!token) return;
-    if (!confirm("Biztosan törli a rendelési időt?")) return;
+    // if (!confirm("Biztosan törli a rendelési időt?")) return;
 
     try {
       const res = await fetch(
