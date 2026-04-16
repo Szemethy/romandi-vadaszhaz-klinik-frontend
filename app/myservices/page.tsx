@@ -203,7 +203,7 @@ export default function MyServicesPage() {
           <div className="grid gap-4 md:grid-cols-2">
             <input
               className="input-bordered input border-[#BF944A] bg-[#36483D] text-white"
-              placeholder="Szakterület"
+              placeholder="Szolgáltatás neve"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
             />

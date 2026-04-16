@@ -76,10 +76,10 @@ export default function DoctorServicesPage() {
     const fetchAvailabilities = async () => {
       try {
         const res = await fetch(
-          `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/availability/${doctorId}`
-        );
-        const data = await res.json();
-        setAvailabilities(Array.isArray(data) ? data : []);
+  `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/availability/doctor/${doctorId}`
+);
+        const result = await res.json();
+setAvailabilities(Array.isArray(result.data) ? result.data : []);
       } catch (err) {
         console.error("Availability hiba:", err);
         setAvailabilities([]);
