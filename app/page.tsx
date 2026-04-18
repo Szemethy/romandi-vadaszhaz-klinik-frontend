@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useGlobalStore } from "@/store/globalStore";
 
@@ -28,6 +28,7 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [enterPressed, setEnterPressed] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Enter key listener
   useEffect(() => {
@@ -80,7 +81,7 @@ export default function AuthPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: trimmedEmail, password: trimmedPassword }),
-        }
+        },
       );
 
       const data: LoginResponse = await res.json();
@@ -102,7 +103,7 @@ export default function AuthPage() {
           gender: data.gender,
           specialization: data.specialization,
         },
-        data.token
+        data.token,
       );
 
       toast.success(`Sikeres bejelentkezés, ${data.name}!`);
@@ -139,22 +140,30 @@ export default function AuthPage() {
           }}
         />
 
-        <input
-          className="input-bordered input mb-4 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:ring-0 focus:outline-none"
-          placeholder="Jelszó"
-          type="password"
-          value={password}
-          onChange={(e) => {
-            setPassword(e.target.value);
-            if (error) setError(null);
-          }}
-        />
+        <div className="relative">
+          <input
+            className="input-bordered input mb-4 w-full border-[#BF944A] bg-[#36483D] pr-10 text-white shadow-lg focus:ring-0 focus:outline-none"
+            placeholder="Jelszó"
+            type={showPassword ? "text" : "password"}
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (error) setError(null);
+            }}
+          />
+
+          <button
+            className="absolute top-2 right-2 cursor-pointer text-sm text-[#BF944A]"
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? "🔐" : "👁️"}
+          </button>
+        </div>
 
         <button
           className={`btn mb-4 w-full shadow-lg hover:bg-[#A89D62] ${
-            enterPressed
-              ? "bg-yellow-400 text-black animate-pulse"
-              : "bg-[#BF944A] text-[#36483D]"
+            enterPressed ? "animate-pulse bg-yellow-400 text-black" : "bg-[#BF944A] text-[#36483D]"
           }`}
           disabled={loading}
           onClick={handleLogin}
