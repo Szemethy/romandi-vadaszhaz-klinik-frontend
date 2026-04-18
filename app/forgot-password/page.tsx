@@ -6,7 +6,6 @@ import toast from "react-hot-toast";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
-
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 

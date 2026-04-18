@@ -52,7 +52,6 @@ export default function AppointmentsPage() {
   }, [currentPage]);
 
   const itemsPerPage = 5;
-
   const activeHours = Array.from({ length: 8 }, (_, i) => 9 + i);
   const minutes = [0, 10, 20, 30, 40, 50];
 
@@ -67,7 +66,7 @@ export default function AppointmentsPage() {
         if (!res.ok) throw new Error("API ERROR");
         setAppointments(Array.isArray(data) ? data : []);
       } catch (error) {
-        console.error("🔥 FETCH ERROR:", error);
+        console.error("FETCH ERROR:", error);
       } finally {
         setLoading(false);
       }
@@ -96,7 +95,7 @@ export default function AppointmentsPage() {
     }
   }, [filteredAppointments.length, totalPages]);
 
-  async function updateStatus(id: string, status: string) {
+  async function updateStatus(id: string, status: Appointment["status"]) {
     try {
       const res = await fetch(
         `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/appointments/${id}`,
@@ -110,9 +109,7 @@ export default function AppointmentsPage() {
         },
       );
       if (!res.ok) throw new Error("Státusz frissítés sikertelen");
-      setAppointments((prev) =>
-        prev.map((a) => (a._id === id ? { ...a, status: status as any } : a)),
-      );
+      setAppointments((prev) => prev.map((a) => (a._id === id ? { ...a, status } : a)));
     } catch (error) {
       console.error(error);
     }

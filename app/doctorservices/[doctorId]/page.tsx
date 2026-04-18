@@ -35,7 +35,6 @@ export default function DoctorServicesPage() {
   const { doctorId } = useParams();
   const router = useRouter();
   const { user, token } = useGlobalStore();
-
   const [services, setServices] = useState<Service[]>([]);
   const [availabilities, setAvailabilities] = useState<Availability[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +44,7 @@ export default function DoctorServicesPage() {
   const [selectedMinute, setSelectedMinute] = useState("");
   const [error, setError] = useState("");
 
-  // 🔐 csak PATIENT láthatja
+  // csak PATIENT láthatja
   useEffect(() => {
     if (user && user.role !== "PATIENT") {
       router.push("/dashboard");
@@ -71,15 +70,15 @@ export default function DoctorServicesPage() {
     if (doctorId) fetchServices();
   }, [doctorId]);
 
-  // ✅ ÚJ: rendelési idők lekérése
+  // ÚJ: rendelési idők lekérése
   useEffect(() => {
     const fetchAvailabilities = async () => {
       try {
         const res = await fetch(
-  `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/availability/doctor/${doctorId}`
-);
+          `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/availability/doctor/${doctorId}`,
+        );
         const result = await res.json();
-setAvailabilities(Array.isArray(result.data) ? result.data : []);
+        setAvailabilities(Array.isArray(result.data) ? result.data : []);
       } catch (err) {
         console.error("Availability hiba:", err);
         setAvailabilities([]);
@@ -163,7 +162,7 @@ setAvailabilities(Array.isArray(result.data) ? result.data : []);
       setSelectedHour("");
       setSelectedMinute("");
     } catch (err: unknown) {
-      console.error("🔥 FRONTEND ERROR:", err);
+      console.error("FRONTEND ERROR:", err);
 
       if (err instanceof Error) {
         setError(err.message);
@@ -181,16 +180,14 @@ setAvailabilities(Array.isArray(result.data) ? result.data : []);
 
         {/* ✅ ÚJ: rendelési idő megjelenítés */}
         <div className="mb-8 rounded-xl bg-[#6B4A2D] p-6 shadow-lg">
-          <h2 className="mb-4 text-xl font-bold text-[#BF944A]">
-            Rendelési idő
-          </h2>
+          <h2 className="mb-4 text-xl font-bold text-[#BF944A]">Rendelési idő</h2>
 
           {availabilities.length === 0 ? (
             <p className="text-white">Nincs megadott rendelési idő</p>
           ) : (
             <div className="space-y-2 text-white">
               {availabilities.map((a) => (
-                <div key={a._id} className="flex justify-between">
+                <div className="flex justify-between" key={a._id}>
                   <span>{a.dayOfWeek}</span>
                   <span>
                     {a.startTime.slice(0, 5)} - {a.endTime.slice(0, 5)}
@@ -204,9 +201,7 @@ setAvailabilities(Array.isArray(result.data) ? result.data : []);
         {loading ? (
           <p>Betöltés...</p>
         ) : services.length === 0 ? (
-          <p className="font-semibold text-white">
-            Az orvosnak jelenleg nincsenek szolgáltatásai!
-          </p>
+          <p className="font-semibold text-white">Az orvosnak jelenleg nincsenek szolgáltatásai!</p>
         ) : (
           <div className="grid gap-6 md:grid-cols-2">
             {services.map((service) => (
@@ -214,9 +209,7 @@ setAvailabilities(Array.isArray(result.data) ? result.data : []);
                 className="rounded-xl border border-[#BF944A]/20 bg-[#6B4A2D] p-6 shadow-lg"
                 key={service._id}
               >
-                <h2 className="mb-2 text-xl font-bold text-[#BF944A]">
-                  {service.topic}
-                </h2>
+                <h2 className="mb-2 text-xl font-bold text-[#BF944A]">{service.topic}</h2>
                 <p className="mb-3 text-white">{service.description}</p>
 
                 <div className="mb-4 space-y-1 text-sm">
@@ -227,9 +220,7 @@ setAvailabilities(Array.isArray(result.data) ? result.data : []);
                 <button
                   className="w-full cursor-pointer rounded bg-[#A2A369] py-2 font-bold text-[#36483D] hover:bg-[#BF944A]"
                   onClick={() =>
-                    setOpenBookingId(
-                      openBookingId === service._id ? null : service._id,
-                    )
+                    setOpenBookingId(openBookingId === service._id ? null : service._id)
                   }
                 >
                   Időpont foglalás
@@ -244,17 +235,13 @@ setAvailabilities(Array.isArray(result.data) ? result.data : []);
                       minDate={new Date()}
                       placeholderText="Dátum kiválasztása"
                       selected={selectedDate}
-                      onChange={(date: Date | null) =>
-                        setSelectedDate(date)
-                      }
+                      onChange={(date: Date | null) => setSelectedDate(date)}
                     />
 
                     <select
                       className="input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:outline-none"
                       value={selectedHour}
-                      onChange={(e) =>
-                        setSelectedHour(e.target.value)
-                      }
+                      onChange={(e) => setSelectedHour(e.target.value)}
                     >
                       <option value="">Óra kiválasztása</option>
                       {activeHours.map((hour) => (
@@ -267,9 +254,7 @@ setAvailabilities(Array.isArray(result.data) ? result.data : []);
                     <select
                       className="input-bordered input w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:outline-none"
                       value={selectedMinute}
-                      onChange={(e) =>
-                        setSelectedMinute(e.target.value)
-                      }
+                      onChange={(e) => setSelectedMinute(e.target.value)}
                     >
                       <option value="">Perc</option>
                       {minutes.map((min) => (
@@ -279,11 +264,7 @@ setAvailabilities(Array.isArray(result.data) ? result.data : []);
                       ))}
                     </select>
 
-                    {error && (
-                      <p className="font-semibold text-red-400">
-                        {error}
-                      </p>
-                    )}
+                    {error && <p className="font-semibold text-red-400">{error}</p>}
 
                     <button
                       className="w-full cursor-pointer rounded bg-green-600 py-2 font-bold text-white hover:bg-green-700"

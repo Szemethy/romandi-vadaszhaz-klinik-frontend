@@ -22,7 +22,6 @@ type LoginResponse = {
 export default function AuthPage() {
   const router = useRouter();
   const { setAuth } = useGlobalStore();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -30,7 +29,6 @@ export default function AuthPage() {
   const [enterPressed, setEnterPressed] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // Enter key listener
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Enter") {
@@ -112,7 +110,7 @@ export default function AuthPage() {
       setError(err instanceof Error ? err.message : "Ismeretlen hiba");
     } finally {
       setLoading(false);
-      setEnterPressed(false); // reset
+      setEnterPressed(false);
     }
   }
 
@@ -157,7 +155,7 @@ export default function AuthPage() {
             type="button"
             onClick={() => setShowPassword(!showPassword)}
           >
-            {showPassword ? "🔐" : "👁️"}
+            {showPassword ? "🔒" : "👁️"}
           </button>
         </div>
 

@@ -18,22 +18,18 @@ type Service = {
 export default function MyServicesPage() {
   const { user, token } = useGlobalStore();
   const router = useRouter();
-
   const [services, setServices] = useState<Service[]>([]);
   const [loadingPage, setLoadingPage] = useState(true);
-
   const [topic, setTopic] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
   const [price, setPrice] = useState("");
   const [loading, setLoading] = useState(false);
-
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
-
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
 
-  // 🔐 csak DOCTOR
+  // csak DOCTOR
   useEffect(() => {
     if (!user) return;
 
@@ -45,7 +41,7 @@ export default function MyServicesPage() {
     fetchServices();
   }, [user]);
 
-  // 📥 szolgáltatások lekérése
+  // szolgáltatások lekérése
   const fetchServices = async () => {
     try {
       const res = await fetch(
@@ -84,7 +80,7 @@ export default function MyServicesPage() {
     });
   }, [currentPage]);
 
-  // ➕ új szolgáltatás vagy 🖊 módosítás
+  // új szolgáltatás vagy 🖊 módosítás
   const createOrUpdateService = async () => {
     if (!topic || !description || !location || !price) {
       toast.error("Minden mező kitöltése kötelező!");
@@ -140,7 +136,7 @@ export default function MyServicesPage() {
     }
   };
 
-  // ❌ szolgáltatás törlése
+  // szolgáltatás törlése
   const deleteService = async (serviceId: string) => {
     if (!confirm("Biztosan törlöd a szolgáltatást?")) return;
 
@@ -168,7 +164,7 @@ export default function MyServicesPage() {
     }
   };
 
-  // 🖊 Módosítás gomb esemény
+  // Módosítás gomb esemény
   const handleEditService = (service: Service) => {
     setTopic(service.topic);
     setDescription(service.description);

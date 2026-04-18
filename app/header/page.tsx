@@ -19,7 +19,6 @@ export default function Header() {
 
   if (!user) return null;
 
-  // 🔥 Role magyarítás
   const roleMap: Record<string, string> = {
     ADMIN: "Admin",
     DOCTOR: "Orvos",

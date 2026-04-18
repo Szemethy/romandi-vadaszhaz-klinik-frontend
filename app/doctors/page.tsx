@@ -1,8 +1,8 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import Header from "@/app/header/page";
-import { useRouter } from "next/navigation";
 import { useGlobalStore } from "@/store/globalStore";
 
 type Doctor = {
@@ -16,7 +16,6 @@ type Doctor = {
 export default function DoctorsPage() {
   const router = useRouter();
   const { user } = useGlobalStore();
-
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -31,7 +30,7 @@ export default function DoctorsPage() {
     const fetchDoctors = async () => {
       try {
         const res = await fetch(
-          "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/users/doctors"
+          "https://romandi-vadaszhaz-klinik-backend.vercel.app/api/users/doctors",
         );
 
         const data = await res.json();
@@ -53,9 +52,7 @@ export default function DoctorsPage() {
       <Header />
 
       <main className="mx-auto max-w-6xl p-8">
-        <h1 className="mb-8 text-3xl font-bold text-[#BF944A]">
-          Orvosaink
-        </h1>
+        <h1 className="mb-8 text-3xl font-bold text-[#BF944A]">Orvosaink</h1>
 
         {loading ? (
           <p>Betöltés...</p>
@@ -63,19 +60,13 @@ export default function DoctorsPage() {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {doctors.map((doctor) => (
               <div
-                key={doctor._id}
                 className="rounded-xl border border-[#BF944A]/20 bg-[#6B4A2D] p-6 shadow-lg transition hover:scale-105 hover:shadow-xl"
+                key={doctor._id}
               >
-                <h2 className="mb-2 text-xl font-bold text-[#BF944A]">
-                  {doctor.name}
-                </h2>
+                <h2 className="mb-2 text-xl font-bold text-[#BF944A]">{doctor.name}</h2>
 
-                <p className="mb-2 text-sm opacity-80">
-                  Szakterület:
-                </p>
-                <p className="mb-4 font-semibold text-white">
-                  {doctor.specialization}
-                </p>
+                <p className="mb-2 text-sm opacity-80">Szakterület:</p>
+                <p className="mb-4 font-semibold text-white">{doctor.specialization}</p>
 
                 <div className="space-y-2 text-sm">
                   <p>
@@ -88,10 +79,8 @@ export default function DoctorsPage() {
 
                 {/* ✅ ÚJ GOMB */}
                 <button
-                  onClick={() =>
-                    router.push(`/doctorservices/${doctor._id}`)
-                  }
-                  className="mt-4 w-full rounded bg-[#A2A369] py-2 font-bold text-[#36483D] hover:bg-[#BF944A] cursor-pointer"
+                  className="mt-4 w-full cursor-pointer rounded bg-[#A2A369] py-2 font-bold text-[#36483D] hover:bg-[#BF944A]"
+                  onClick={() => router.push(`/doctorservices/${doctor._id}`)}
                 >
                   Szolgáltatások
                 </button>
