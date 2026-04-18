@@ -10,6 +10,7 @@ export default function RegistrationPage() {
   const [error, setError] = useState<string | null>(null);
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -231,13 +232,23 @@ export default function RegistrationPage() {
           />
           {fieldErrors.email && <p className="mb-2 text-sm text-red-400">{fieldErrors.email}</p>}
 
-          <input
-            className="input-bordered input mb-1 w-full border-[#BF944A] bg-[#36483D] text-white shadow-lg focus:ring-0 focus:outline-none"
-            name="password"
-            placeholder="Jelszó"
-            type="password"
-            onChange={handleChange}
-          />
+          <div className="relative">
+            <input
+              className="input-bordered input mb-1 w-full border-[#BF944A] bg-[#36483D] pr-10 text-white shadow-lg focus:ring-0 focus:outline-none"
+              name="password"
+              placeholder="Jelszó"
+              type={showPassword ? "text" : "password"}
+              onChange={handleChange}
+            />
+
+            <button
+              className="absolute top-2 right-2 text-sm text-[#BF944A]"
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? "🔐" : "👁️"}
+            </button>
+          </div>
           {fieldErrors.password && (
             <p className="mb-2 text-sm text-red-400">{fieldErrors.password}</p>
           )}
