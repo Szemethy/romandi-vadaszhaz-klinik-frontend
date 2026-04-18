@@ -27,6 +27,7 @@ export default function MyServicesPage() {
   const [loading, setLoading] = useState(false);
   const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const itemsPerPage = 4;
 
   // csak DOCTOR
@@ -80,15 +81,16 @@ export default function MyServicesPage() {
     });
   }, [currentPage]);
 
-  // új szolgáltatás vagy 🖊 módosítás
+  // új szolgáltatás vagy módosítás
   const createOrUpdateService = async () => {
     if (!topic || !description || !location || !price) {
-      toast.error("Minden mező kitöltése kötelező!");
+      setErrorMessage("Minden mező kitöltése kötelező!");
       return;
     }
 
     try {
       setLoading(true);
+      setErrorMessage(null);
 
       const url = editingServiceId
         ? `https://romandi-vadaszhaz-klinik-backend.vercel.app/api/services/${editingServiceId}`
@@ -201,25 +203,37 @@ export default function MyServicesPage() {
               className="input-bordered input border-[#BF944A] bg-[#36483D] text-white"
               placeholder="Szolgáltatás neve"
               value={topic}
-              onChange={(e) => setTopic(e.target.value)}
+              onChange={(e) => {
+                setTopic(e.target.value);
+                setErrorMessage(null);
+              }}
             />
             <input
               className="input-bordered input border-[#BF944A] bg-[#36483D] text-white"
               placeholder="Helyszín"
               value={location}
-              onChange={(e) => setLocation(e.target.value)}
+              onChange={(e) => {
+                setLocation(e.target.value);
+                setErrorMessage(null);
+              }}
             />
             <input
               className="input-bordered input border-[#BF944A] bg-[#36483D] text-white"
               placeholder="Ár"
               value={price}
-              onChange={(e) => setPrice(e.target.value)}
+              onChange={(e) => {
+                setPrice(e.target.value);
+                setErrorMessage(null);
+              }}
             />
             <textarea
               className="min-h-[120px] w-full resize-y rounded border border-[#BF944A] bg-[#36483D] p-3 text-white md:col-span-2"
               placeholder="Leírás"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => {
+                setDescription(e.target.value);
+                setErrorMessage(null);
+              }}
             />
           </div>
 
@@ -234,6 +248,7 @@ export default function MyServicesPage() {
                 ? "Módosítás mentése"
                 : "Szolgáltatás létrehozása"}
           </button>
+          {errorMessage && <p className="mt-3 text-center text-sm text-red-400">{errorMessage}</p>}
         </div>
 
         {/* LISTA */}
@@ -256,14 +271,14 @@ export default function MyServicesPage() {
 
                 <div className="mt-4 flex gap-2">
                   <button
-                    className="cursor-pointer flex-1 rounded bg-yellow-500 py-2 font-bold text-white"
+                    className="flex-1 cursor-pointer rounded bg-yellow-500 py-2 font-bold text-white"
                     onClick={() => handleEditService(service)}
                   >
                     Módosítás
                   </button>
 
                   <button
-                    className="cursor-pointer flex-1 rounded bg-red-600 py-2 font-bold text-white"
+                    className="flex-1 cursor-pointer rounded bg-red-600 py-2 font-bold text-white"
                     onClick={() => deleteService(service._id)}
                   >
                     Törlés
