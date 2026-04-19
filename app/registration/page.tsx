@@ -93,10 +93,10 @@ export default function RegistrationPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[#36483D] p-6 text-[#A89D62]">
+    <div className="flex min-h-screen flex-col items-center justify-center overflow-x-hidden bg-[#36483D] p-6 text-[#A89D62]">
       <h1 className="mb-6 text-5xl font-bold">Regisztráció</h1>
 
-      <div className="mb-8 flex gap-4">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row">
         <button
           className={`btn ${role === "doctor" ? "btn" : "btn-outline"} text-base text-[#BF944A]`}
           onClick={() => {
@@ -230,7 +230,7 @@ export default function RegistrationPage() {
           />
           {fieldErrors.email && <p className="mb-2 text-sm text-red-400">{fieldErrors.email}</p>}
 
-          <div className="relative w-full overflow-hidden">
+          <div className="relative">
             <input
               className="input-bordered input mb-1 w-full border-[#BF944A] bg-[#36483D] pr-10 text-white shadow-lg focus:ring-0 focus:outline-none"
               name="password"
