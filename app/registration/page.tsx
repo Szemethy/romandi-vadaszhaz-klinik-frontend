@@ -230,7 +230,7 @@ export default function RegistrationPage() {
           />
           {fieldErrors.email && <p className="mb-2 text-sm text-red-400">{fieldErrors.email}</p>}
 
-          <div className="relative">
+          <div className="relative w-full overflow-hidden">
             <input
               className="input-bordered input mb-1 w-full border-[#BF944A] bg-[#36483D] pr-10 text-white shadow-lg focus:ring-0 focus:outline-none"
               name="password"
