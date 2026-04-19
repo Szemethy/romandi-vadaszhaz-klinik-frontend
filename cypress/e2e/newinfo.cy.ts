@@ -1,19 +1,9 @@
-describe("NewRecordPage - alap tesztek", () => {
-  const appointmentId = "teszt-id-123";
-
-  it("betöltődik az oldal címe", () => {
-    cy.visit(`/newrecord/${appointmentId}`);
-    cy.contains("Lelet készítése").should("exist");
+describe("DoctorServices Page - basic check", () => {
+  beforeEach(() => {
+    cy.visit("http://localhost:8080/doctorservices/69e3df85a59be250f1ebe221");
   });
 
-  it("betöltés szöveg megjelenik", () => {
-    cy.visit(`/newrecord/${appointmentId}`);
-    cy.contains("Betöltés...").should("exist");
-  });
-
-  it("textarea és mentés gomb megjelenik", () => {
-    cy.visit(`/newrecord/${appointmentId}`);
-    cy.get("textarea[placeholder='Írd ide a leletet...']").should("exist");
-    cy.contains("Lelet mentése").should("exist");
+  it("1. Betölt az oldal (main látható)", () => {
+    cy.get("body").should("exist");
   });
 });

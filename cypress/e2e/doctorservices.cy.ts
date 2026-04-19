@@ -1,25 +1,37 @@
-it("debug", () => {
-  cy.visit("http://localhost:8080/doctorservices/69c3900b83e25eb460d13192");
+// cypress/e2e/doctorservices.cy.ts
 
-  cy.get("body").then(($body) => {
-    console.log($body.html());
+describe("DoctorServices Page - alap tesztek", () => {
+  const doctorId = "69e3df85a59be250f1ebe221";
+
+  beforeEach(() => {
+    cy.visit(`http://localhost:8080/doctorservices/${doctorId}`, {
+      onBeforeLoad(win) {
+        win.localStorage.setItem(
+          "auth-storage",
+          JSON.stringify({
+            state: {
+              user: {
+                id: "1",
+                role: "PATIENT",
+                name: "Test User",
+                email: "test@test.hu",
+                phone: "",
+                address: "",
+                tajNumber: "",
+              },
+              token: "fake-token",
+            },
+          }),
+        );
+      },
+    });
   });
-});
 
-it("betöltődik a szolgáltatások oldal", () => {
-  cy.visit("http://localhost:8080/doctorservices/69c3900b83e25eb460d13192");
+  it("1. Az oldal betölt", () => {
+    cy.get("main").should("exist");
+  });
 
-  cy.contains("Szolgáltatások").should("exist");
-});
-
-it("loading szöveg megjelenik", () => {
-  cy.visit("http://localhost:8080/doctorservices/69c3900b83e25eb460d13192");
-
-  cy.contains("Betöltés...").should("exist");
-});
-
-it("loading szöveg megjelenik", () => {
-  cy.visit("http://localhost:8080/doctorservices/69c3900b83e25eb460d13192");
-
-  cy.contains("Betöltés...").should("exist");
+  it("2. Látszik a Szolgáltatások cím", () => {
+    cy.contains("Szolgáltatások").should("exist");
+  });
 });

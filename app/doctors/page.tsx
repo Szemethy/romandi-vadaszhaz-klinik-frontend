@@ -45,7 +45,27 @@ export default function DoctorsPage() {
     fetchDoctors();
   }, []);
 
-  if (!user || user.role !== "PATIENT") return null;
+  if (!user) {
+  return (
+    <div className="min-h-screen bg-[#36483D] text-[#A89D62]">
+      <Header />
+      <main className="mx-auto max-w-6xl p-8">
+        <p>Betöltés...</p>
+      </main>
+    </div>
+  );
+}
+
+if (user.role !== "PATIENT") {
+  return (
+    <div className="min-h-screen bg-[#36483D] text-[#A89D62]">
+      <Header />
+      <main className="mx-auto max-w-6xl p-8">
+        <p>Nincs jogosultság</p>
+      </main>
+    </div>
+  );
+}
 
   return (
     <div className="min-h-screen bg-[#36483D] text-[#A89D62]">
