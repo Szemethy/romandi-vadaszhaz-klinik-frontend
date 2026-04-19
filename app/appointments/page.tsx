@@ -237,10 +237,10 @@ export default function AppointmentsPage() {
                   <p>👨‍⚕️ Orvos: {app.doctor_id.name}</p>
                   <p>👤 Páciens: {app.patient_id.name}</p>
                   <p>💰 {app.service_id.price}</p>
-                  {app.referral_type === "SELF" && <p>📌 Forrás: Saját beutalás</p>}
+                  {/* {app.referral_type === "SELF" && <p>📌 Forrás: Saját beutalás</p>}
                   {app.referral_type === "DOCTOR" && app.referred_by && (
                     <p>📌 Beutaló orvos: {app.referred_by.name}</p>
-                  )}
+                  )} */}
 
                   <p
                     className={`font-bold ${
