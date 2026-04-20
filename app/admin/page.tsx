@@ -51,10 +51,10 @@ export default function AdminPage() {
       const ser = await serRes.json();
       const a = await aRes.json();
 
-      console.log("📊 STATS RAW:", s);
-      console.log("👤 USERS RAW:", u);
-      console.log("🛠 SERVICES RAW:", ser);
-      console.log("📅 APPOINTMENTS RAW:", a);
+      console.log("STATS RAW:", s);
+      console.log("USERS RAW:", u);
+      console.log("SERVICES RAW:", ser);
+      console.log("APPOINTMENTS RAW:", a);
       console.log("USERS IS ARRAY?", Array.isArray(u));
       console.log("USERS.users IS ARRAY?", Array.isArray(u?.users));
 
@@ -97,7 +97,6 @@ export default function AdminPage() {
   async function deleteUser(id: string) {
     const currentUserId = user?._id || user?.id;
 
-    // saját magad védelme
     if (currentUserId === id) {
       toast.error("Te őrült!! Nem törölheted saját magad 😈");
       return;
@@ -143,7 +142,7 @@ export default function AdminPage() {
     });
 
     toast.success("DB reset done");
-    window.location.reload(); // 👈 EZ
+    window.location.reload(); 
   }
 
   async function seedDb() {
@@ -153,7 +152,7 @@ export default function AdminPage() {
     });
 
     toast.success("Seed kész");
-    window.location.reload(); // 👈 EZ
+    window.location.reload(); 
   }
 
   return (
