@@ -81,6 +81,10 @@ export default function TimetablePage() {
       setErrorMessage("Hiba: Nincs bejelentkezett felhasználó");
       return;
     }
+    if (startTime >= endTime) {
+      setErrorMessage("A kezdési idő nem lehet későbbi vagy egyenlő a befejezéssel");
+      return;
+    }
 
     try {
       setLoading(true);
