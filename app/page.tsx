@@ -106,7 +106,11 @@ export default function AuthPage() {
       );
 
       toast.success(`Sikeres bejelentkezés, ${data.name}!`);
-      router.push("/dashboard");
+      if (data.role === "ADMIN") {
+        router.push("/admin");
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Ismeretlen hiba");
     } finally {
