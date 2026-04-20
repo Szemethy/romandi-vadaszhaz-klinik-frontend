@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { FaClock, FaMapMarkerAlt, FaUser } from "react-icons/fa";
 import { useGlobalStore } from "@/store/globalStore";
 
 type Appointment = {
@@ -149,9 +150,22 @@ export default function NewRecordPage() {
           <h1 className="mb-6 text-center text-2xl font-bold text-[#BF944A]">Lelet készítése</h1>
 
           <div className="mb-4 rounded-xl bg-[#4A362D] p-4 text-white shadow-inner">
-            <p>📍 Szolgáltatás: {appointment.service_id.topic}</p>
-            <p>🕒 Időpont: {dayjs(appointment.startTime).format("YYYY.MM.DD HH:mm")}</p>
-            <p>👤 Páciens: {appointment.patient_id.name}</p>
+            <div className="space-y-2">
+              <p className="flex items-center gap-2">
+                <FaMapMarkerAlt className="text-[#BF944A]" />
+                Szolgáltatás: {appointment.service_id.topic}
+              </p>
+
+              <p className="flex items-center gap-2">
+                <FaClock className="text-blue-400" />
+                Időpont: {dayjs(appointment.startTime).format("YYYY.MM.DD HH:mm")}
+              </p>
+
+              <p className="flex items-center gap-2">
+                <FaUser className="text-green-400" />
+                Páciens: {appointment.patient_id.name}
+              </p>
+            </div>
           </div>
 
           <textarea

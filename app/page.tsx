@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useGlobalStore } from "@/store/globalStore";
 
 type LoginResponse = {
@@ -151,11 +152,11 @@ export default function AuthPage() {
           />
 
           <button
-            className="absolute top-2 right-2 cursor-pointer text-sm text-[#BF944A]"
+            className="absolute top-2 right-2 cursor-pointer text-[#BF944A]"
             type="button"
             onClick={() => setShowPassword(!showPassword)}
           >
-            {showPassword ? "🔒" : "👁️"}
+            {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
           </button>
         </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import dayjs from "dayjs";
+import { Banknote, Clock, MapPin, Stethoscope, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
@@ -232,11 +233,25 @@ export default function AppointmentsPage() {
                 <div
                   className={`space-y-1 text-sm text-white ${isUnavailable ? "line-through" : ""}`}
                 >
-                  <p>📍 {app.service_id.location}</p>
-                  <p>🕒 {dayjs(app.startTime).format("YYYY.MM.DD HH:mm")}</p>
-                  <p>👨‍⚕️ Orvos: {app.doctor_id.name}</p>
-                  <p>👤 Páciens: {app.patient_id.name}</p>
-                  <p>💰 {app.service_id.price}</p>
+                  <p className="flex items-center gap-2">
+                    <MapPin size={16} /> {app.service_id.location}
+                  </p>
+
+                  <p className="flex items-center gap-2">
+                    <Clock size={16} /> {dayjs(app.startTime).format("YYYY.MM.DD HH:mm")}
+                  </p>
+
+                  <p className="flex items-center gap-2">
+                    <Stethoscope size={16} /> Orvos: {app.doctor_id.name}
+                  </p>
+
+                  <p className="flex items-center gap-2">
+                    <User size={16} /> Páciens: {app.patient_id.name}
+                  </p>
+
+                  <p className="flex items-center gap-2">
+                    <Banknote size={16} /> {app.service_id.price}
+                  </p>
                   {/* {app.referral_type === "SELF" && <p>📌 Forrás: Saját beutalás</p>}
                   {app.referral_type === "DOCTOR" && app.referred_by && (
                     <p>📌 Beutaló orvos: {app.referred_by.name}</p>

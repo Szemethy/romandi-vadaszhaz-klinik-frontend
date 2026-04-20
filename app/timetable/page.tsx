@@ -1,5 +1,6 @@
 "use client";
 
+import { Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -236,14 +237,15 @@ export default function TimetablePage() {
                         title="Módosítás"
                         onClick={() => handleEdit(item)}
                       >
-                        ✏️
+                        <Pencil size={18} />
                       </button>
+
                       <button
                         className="cursor-pointer transition-transform duration-200 hover:scale-125 hover:text-red-500"
                         title="Törlés"
                         onClick={() => handleDelete(item._id)}
                       >
-                        🗑️
+                        <Trash2 size={18} />
                       </button>
                     </div>
                   </div>

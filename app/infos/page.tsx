@@ -1,5 +1,6 @@
 "use client";
 
+import { Calendar, FileText, MapPin, Stethoscope, User } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import Header from "@/app/header/page";
 import { useGlobalStore } from "@/store/globalStore";
@@ -148,20 +149,24 @@ export default function InfosPage() {
               >
                 <h2 className="mb-2 text-xl font-bold text-[#BF944A]">{record.service.topic}</h2>
 
-                <p className="mb-1 text-sm opacity-80">📍 {record.service.location}</p>
+                <p className="mb-1 flex items-center gap-2 text-sm opacity-80">
+                  <MapPin size={16} /> {record.service.location}
+                </p>
 
-                <p className="mb-1 text-sm opacity-80">
-                  👨‍⚕️ Orvos: {record.doctor.name} ({record.doctor.specialization})
+                <p className="mb-1 flex items-center gap-2 text-sm opacity-80">
+                  <Stethoscope size={16} />
+                  Orvos: {record.doctor.name} ({record.doctor.specialization})
                 </p>
 
                 {user && user.role === "DOCTOR" && (
-                  <p className="mb-1 text-sm opacity-80">
-                    🧑 Páciens: {record.patient.name} (TAJ: {record.patient.tajNumber})
+                  <p className="mb-1 flex items-center gap-2 text-sm opacity-80">
+                    <User size={16} />
+                    Páciens: {record.patient.name} (TAJ: {record.patient.tajNumber})
                   </p>
                 )}
 
-                <p className="mb-3 text-sm opacity-80">
-                  📅{" "}
+                <p className="mb-3 flex items-center gap-2 text-sm opacity-80">
+                  <Calendar size={16} />
                   {new Date(record.createdAt).toLocaleString("hu-HU", {
                     year: "numeric",
                     month: "2-digit",
@@ -174,10 +179,11 @@ export default function InfosPage() {
                 <p className="text-white">{record.description}</p>
 
                 <button
-                  className="btn mt-4 w-full cursor-pointer rounded bg-[#A2A369] py-2 font-bold text-[#36483D] hover:bg-[#BF944A]"
+                  className="btn mt-4 flex w-full items-center justify-center gap-2 rounded bg-[#A2A369] py-2 font-bold text-[#36483D] hover:bg-[#BF944A]"
                   onClick={() => downloadPDF(record._id)}
                 >
-                  📄 Lelet letöltése (PDF)
+                  <FileText size={16} />
+                  Lelet letöltése (PDF)
                 </button>
               </div>
             ))}

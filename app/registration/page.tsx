@@ -1,4 +1,5 @@
 "use client";
+import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -240,11 +241,11 @@ export default function RegistrationPage() {
             />
 
             <button
-              className="absolute top-2 right-2 text-sm text-[#BF944A]"
+              className="absolute top-2 right-2 text-[#BF944A]"
               type="button"
               onClick={() => setShowPassword(!showPassword)}
             >
-              {showPassword ? "🔒" : "👁️"}
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
           {fieldErrors.password && (

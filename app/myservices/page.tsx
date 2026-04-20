@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { FaEdit, FaMapMarkerAlt, FaMoneyBillWave, FaTrash } from "react-icons/fa";
 import Header from "@/app/header/page";
 import { useGlobalStore } from "@/store/globalStore";
 
@@ -265,22 +266,30 @@ export default function MyServicesPage() {
                 <p className="mt-2 text-white">{service.description}</p>
 
                 <div className="mt-3 text-sm">
-                  <p>📍 {service.location}</p>
-                  <p className="font-bold text-white">💰 {service.price}</p>
+                  <p className="flex items-center gap-2">
+                    <FaMapMarkerAlt />
+                    {service.location}
+                  </p>
+                  <p className="flex items-center gap-2 font-bold">
+                    <FaMoneyBillWave />
+                    {service.price}
+                  </p>
                 </div>
 
                 <div className="mt-4 flex gap-2">
                   <button
-                    className="flex-1 cursor-pointer rounded bg-yellow-500 py-2 font-bold text-white"
+                    className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded bg-yellow-500 py-2 font-bold text-white"
                     onClick={() => handleEditService(service)}
                   >
+                    <FaEdit />
                     Módosítás
                   </button>
 
                   <button
-                    className="flex-1 cursor-pointer rounded bg-red-600 py-2 font-bold text-white"
+                    className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded bg-red-600 py-2 font-bold text-white"
                     onClick={() => deleteService(service._id)}
                   >
+                    <FaTrash />
                     Törlés
                   </button>
                 </div>
