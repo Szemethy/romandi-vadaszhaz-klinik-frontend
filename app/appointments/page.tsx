@@ -234,23 +234,25 @@ export default function AppointmentsPage() {
                   className={`space-y-1 text-sm text-white ${isUnavailable ? "line-through" : ""}`}
                 >
                   <p className="flex items-center gap-2">
-                    <MapPin size={16} /> {app.service_id.location}
+                    <MapPin className="text-red-400" size={16} /> {app.service_id.location}
                   </p>
 
                   <p className="flex items-center gap-2">
-                    <Clock size={16} /> {dayjs(app.startTime).format("YYYY.MM.DD HH:mm")}
+                    <Clock className="text-blue-400" size={16} />{" "}
+                    {dayjs(app.startTime).format("YYYY.MM.DD HH:mm")}
                   </p>
 
                   <p className="flex items-center gap-2">
-                    <Stethoscope size={16} /> Orvos: {app.doctor_id.name}
+                    <Stethoscope className="text-purple-400" size={16} /> Orvos:{" "}
+                    {app.doctor_id.name}
                   </p>
 
                   <p className="flex items-center gap-2">
-                    <User size={16} /> Páciens: {app.patient_id.name}
+                    <User className="text-green-400" size={16} /> Páciens: {app.patient_id.name}
                   </p>
 
                   <p className="flex items-center gap-2">
-                    <Banknote size={16} /> {app.service_id.price}
+                    <Banknote className="text-yellow-400" size={16} /> {app.service_id.price}
                   </p>
                   {/* {app.referral_type === "SELF" && <p>📌 Forrás: Saját beutalás</p>}
                   {app.referral_type === "DOCTOR" && app.referred_by && (
