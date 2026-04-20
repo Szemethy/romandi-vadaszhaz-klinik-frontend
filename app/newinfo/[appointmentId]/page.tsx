@@ -1,10 +1,10 @@
 "use client";
 
 import dayjs from "dayjs";
+import { Clock, MapPin, User } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { FaClock, FaMapMarkerAlt, FaUser } from "react-icons/fa";
 import { useGlobalStore } from "@/store/globalStore";
 
 type Appointment = {
@@ -152,17 +152,17 @@ export default function NewRecordPage() {
           <div className="mb-4 rounded-xl bg-[#4A362D] p-4 text-white shadow-inner">
             <div className="space-y-2">
               <p className="flex items-center gap-2">
-                <FaMapMarkerAlt className="text-[#BF944A]" />
+                <MapPin className="text-red-400" size={16} />
                 Szolgáltatás: {appointment.service_id.topic}
               </p>
 
               <p className="flex items-center gap-2">
-                <FaClock className="text-blue-400" />
+                <Clock className="text-blue-400" size={16} />
                 Időpont: {dayjs(appointment.startTime).format("YYYY.MM.DD HH:mm")}
               </p>
 
               <p className="flex items-center gap-2">
-                <FaUser className="text-green-400" />
+                <User className="text-green-400" size={16} />
                 Páciens: {appointment.patient_id.name}
               </p>
             </div>
@@ -177,7 +177,7 @@ export default function NewRecordPage() {
           />
 
           <button
-            className="mt-4 w-full rounded bg-green-600 py-2 font-bold text-white hover:bg-green-700"
+            className="mt-4 w-full cursor-pointer rounded bg-green-600 py-2 font-bold text-white hover:bg-green-700"
             disabled={saving}
             onClick={handleSave}
           >

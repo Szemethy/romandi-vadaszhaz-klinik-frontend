@@ -150,23 +150,23 @@ export default function InfosPage() {
                 <h2 className="mb-2 text-xl font-bold text-[#BF944A]">{record.service.topic}</h2>
 
                 <p className="mb-1 flex items-center gap-2 text-sm opacity-80">
-                  <MapPin size={16} /> {record.service.location}
+                  <MapPin className="text-red-400" size={16} /> {record.service.location}
                 </p>
 
                 <p className="mb-1 flex items-center gap-2 text-sm opacity-80">
-                  <Stethoscope size={16} />
+                  <Stethoscope className="text-purple-400" size={16} />
                   Orvos: {record.doctor.name} ({record.doctor.specialization})
                 </p>
 
                 {user && user.role === "DOCTOR" && (
                   <p className="mb-1 flex items-center gap-2 text-sm opacity-80">
-                    <User size={16} />
+                    <User className="text-green-400" size={16} />
                     Páciens: {record.patient.name} (TAJ: {record.patient.tajNumber})
                   </p>
                 )}
 
                 <p className="mb-3 flex items-center gap-2 text-sm opacity-80">
-                  <Calendar size={16} />
+                  <Calendar className="text-blue-400" size={16} />
                   {new Date(record.createdAt).toLocaleString("hu-HU", {
                     year: "numeric",
                     month: "2-digit",

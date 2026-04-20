@@ -1,9 +1,9 @@
 "use client";
 
+import { Banknote, MapPin, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { FaEdit, FaMapMarkerAlt, FaMoneyBillWave, FaTrash } from "react-icons/fa";
 import Header from "@/app/header/page";
 import { useGlobalStore } from "@/store/globalStore";
 
@@ -267,29 +267,29 @@ export default function MyServicesPage() {
 
                 <div className="mt-3 text-sm">
                   <p className="flex items-center gap-2">
-                    <FaMapMarkerAlt />
+                    <MapPin className="text-red-400" size={16} />
                     {service.location}
                   </p>
                   <p className="flex items-center gap-2 font-bold">
-                    <FaMoneyBillWave />
+                    <Banknote className="text-yellow-400" size={16} />
                     {service.price}
                   </p>
                 </div>
 
                 <div className="mt-4 flex gap-2">
                   <button
-                    className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded bg-yellow-500 py-2 font-bold text-white"
+                    className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded bg-yellow-500 py-2 font-bold text-white transition hover:scale-105 hover:bg-yellow-400"
                     onClick={() => handleEditService(service)}
                   >
-                    <FaEdit />
+                    <Pencil className="transition hover:text-yellow-200" size={16} />
                     Módosítás
                   </button>
 
                   <button
-                    className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded bg-red-600 py-2 font-bold text-white"
+                    className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded bg-red-600 py-2 font-bold text-white transition hover:scale-105 hover:bg-red-700"
                     onClick={() => deleteService(service._id)}
                   >
-                    <FaTrash />
+                    <Trash2 className="transition hover:text-red-200" size={16} />
                     Törlés
                   </button>
                 </div>
