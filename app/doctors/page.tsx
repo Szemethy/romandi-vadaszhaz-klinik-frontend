@@ -99,7 +99,7 @@ if (user.role !== "PATIENT") {
 
                 {/* ✅ ÚJ GOMB */}
                 <button
-                  className="mt-4 w-full cursor-pointer rounded bg-[#A2A369] py-2 font-bold text-[#36483D] hover:bg-[#BF944A]"
+                  className="btn mt-4 w-full cursor-pointer rounded bg-[#A2A369] py-2 font-bold text-[#36483D] hover:bg-[#BF944A]"
                   onClick={() => router.push(`/doctorservices/${doctor._id}`)}
                 >
                   Szolgáltatások
