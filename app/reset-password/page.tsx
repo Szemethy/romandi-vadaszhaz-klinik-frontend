@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -101,7 +102,7 @@ const [showConfirm, setShowConfirm] = useState(false);
     className="absolute top-2 right-2 text-[#BF944A]"
     onClick={() => setShowPassword(!showPassword)}
   >
-    {showPassword ? "🔒" : "👁️"}
+    {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
   </button>
 </div>
 
@@ -119,7 +120,7 @@ const [showConfirm, setShowConfirm] = useState(false);
     className="absolute top-2 right-2 text-[#BF944A]"
     onClick={() => setShowConfirm(!showConfirm)}
   >
-    {showConfirm ? "🔒" : "👁️"}
+    {showConfirm ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
   </button>
 </div>
 

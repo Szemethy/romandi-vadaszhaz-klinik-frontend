@@ -187,14 +187,14 @@ export default function AdminPage() {
           className="cursor-pointer rounded bg-red-600 px-3 py-2 text-white transition-all duration-150 hover:scale-105 hover:opacity-90"
           onClick={resetDb}
         >
-          RESET DB
+          Adatbázis törlése
         </button>
 
         <button
           className="cursor-pointer rounded bg-green-600 px-3 py-2 text-white transition-all duration-150 hover:scale-105 hover:opacity-90"
           onClick={seedDb}
         >
-          SEED DB
+          Mintaadatok feltöltés
         </button>
       </div>
 
