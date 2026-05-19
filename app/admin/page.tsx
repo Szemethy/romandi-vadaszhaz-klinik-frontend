@@ -142,7 +142,7 @@ export default function AdminPage() {
     });
 
     toast.success("DB reset done");
-    window.location.reload(); 
+    window.location.reload();
   }
 
   async function seedDb() {
@@ -152,7 +152,7 @@ export default function AdminPage() {
     });
 
     toast.success("Seed kész");
-    window.location.reload(); 
+    window.location.reload();
   }
 
   return (
@@ -194,7 +194,7 @@ export default function AdminPage() {
           className="cursor-pointer rounded bg-green-600 px-3 py-2 text-white transition-all duration-150 hover:scale-105 hover:opacity-90"
           onClick={seedDb}
         >
-          Mintaadatok feltöltés
+          Mintaadatok feltöltése
         </button>
       </div>
 
