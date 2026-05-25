@@ -53,7 +53,7 @@ export default function AppointmentsPage() {
   }, [currentPage]);
 
   const itemsPerPage = 5;
-  const activeHours = Array.from({ length: 8 }, (_, i) => 9 + i);
+  const activeHours = Array.from({ length: 9 }, (_, i) => 8 + i);
   const minutes = [0, 10, 20, 30, 40, 50];
 
   useEffect(() => {
